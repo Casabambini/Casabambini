@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3f8f78">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Casabambini">
+<title>Casabambini – Tagespflege</title>
+<style>
+:root{--bg:#f6f7f5;--card:#fff;--ink:#1f2d29;--mute:#74837e;--pri:#3f8f78;--pri-d:#2f705d;--out:#e08a3c;--bad:#c0463f;--bad-bg:#fcefed;--line:#e7eae7;--soft:#eaf4f0;--field:#f1f3f1;--shadow:0 1px 2px rgba(31,45,41,.05),0 6px 18px rgba(31,45,41,.05)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;padding-bottom:96px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:680px;margin:0 auto;padding:18px 16px}
+.brand{font-weight:700;font-size:14px;letter-spacing:.04em;color:var(--pri-d);margin-bottom:6px}
+h1{font-size:28px;line-height:1.2;margin:2px 0 4px;letter-spacing:-.01em}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:30px 0 10px;font-weight:700}
+h3{margin:0;font-size:18px;font-weight:650}
+a{color:var(--pri-d)}
+.mute{color:var(--mute);font-size:15px}
+.mini{font-size:13.5px;color:var(--mute);line-height:1.45}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:12px 0;box-shadow:var(--shadow)}
+.card .card{box-shadow:none;background:var(--field);border-radius:14px}
+.row{display:flex;gap:14px;align-items:center}.grow{flex:1;min-width:0}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{appearance:none;border:0;border-radius:16px;min-height:56px;padding:12px 20px;font:600 17px inherit;font-family:inherit;background:var(--soft);color:var(--pri-d);cursor:pointer;flex:1 1 auto;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .08s,filter .15s}
+.btn:hover{filter:brightness(.97)}.btn:active{transform:scale(.97)}
+.btn.go{background:var(--pri);color:#fff}.btn.out{background:var(--out);color:#fff}
+.btn.bad{background:var(--bad-bg);color:var(--bad)}.btn.sm{min-height:46px;font-size:15.5px;padding:8px 16px;border-radius:14px}
+.btn.full{width:100%}.btn[disabled]{opacity:.45;pointer-events:none}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--soft);color:var(--pri-d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;object-fit:cover;flex:none}
+.avatar.big{width:104px;height:104px;font-size:40px;margin:0 auto}
+.tag{display:inline-block;border-radius:999px;padding:3px 11px;font-size:13.5px;font-weight:600;margin:6px 6px 0 0;background:var(--soft);color:var(--pri-d)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.alert{background:var(--bad-bg);color:#80302b;border-radius:16px;padding:13px 16px;margin:12px 0}
+.info{background:var(--soft);color:#24574a;border-radius:16px;padding:13px 16px;margin:12px 0}
+label{display:block;font-weight:600;font-size:14.5px;color:var(--mute);margin:16px 0 6px}
+input,select,textarea{width:100%;font:inherit;padding:13px 14px;border:2px solid transparent;border-radius:14px;background:var(--field);color:var(--ink);min-height:52px;transition:border-color .15s,background .15s}
+textarea{min-height:88px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--pri);background:#fff}
+input[type=checkbox]{width:24px;min-height:24px;accent-color:var(--pri)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:5}
+nav button{flex:1;border:0;background:none;border-radius:14px;padding:6px 2px 5px;font:600 11.5px inherit;font-family:inherit;color:var(--mute);cursor:pointer}
+nav button span{display:block;font-size:23px;line-height:1.15;filter:grayscale(1);opacity:.7}
+nav button.on{color:var(--pri-d);background:var(--soft)}
+nav button.on span{filter:none;opacity:1}
+#sheet{position:fixed;inset:0;background:var(--bg);overflow:auto;z-index:10;display:none}
+#sheet.show{display:block;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.bar{height:10px;background:var(--field);border-radius:6px;overflow:hidden;margin:10px 0 6px}.bar i{display:block;height:100%;background:var(--pri);border-radius:6px}
+.lock{max-width:400px;margin:10vh auto;padding:22px;text-align:center}
+.lock .logo{font-size:64px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.x{border:0;background:#fff;box-shadow:var(--shadow);border-radius:14px;min-height:46px;padding:8px 16px;font:600 15px inherit;font-family:inherit;color:var(--ink);cursor:pointer;flex:none}
+.sub{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:12px 0}
+.cal>b{text-align:center;font-size:12.5px;color:var(--mute);font-weight:600}
+.cal button{min-height:56px;border:0;background:#fff;border-radius:12px;font:600 16px inherit;font-family:inherit;color:var(--ink);padding:4px 2px;cursor:pointer;box-shadow:var(--shadow)}
+.cal button.tod{background:var(--pri);color:#fff}
+.cal button.void{visibility:hidden;box-shadow:none}
+.dots{display:flex;justify-content:center;gap:3px;flex-wrap:wrap;min-height:12px;margin-top:2px;font-size:11px}
+.dots i{width:8px;height:8px;border-radius:50%;display:block;box-shadow:0 0 0 1.5px #fff}
+table.t{width:100%;border-collapse:collapse;margin:10px 0}.t td,.t th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:left;font-size:15.5px}.t th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}.t td:last-child,.t th:last-child{text-align:right;white-space:nowrap}.t tr.sum td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
+@media print{nav,.btns,.x,#app,.brand{display:none!important}#sheet{position:static;overflow:visible;background:#fff;animation:none}body{padding:0;background:#fff}}
+@media (max-width:380px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheet"></div>
+<script>
+"use strict";
+/* ---------- Helfer ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const dstr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => dstr(new Date());
+const nowT = () => { const d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const parseD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const fmtD = s => s ? parseD(s).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'numeric'}) : '';
+const fmtLong = s => parseD(s).toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+const mins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+const fmtH = m => `${Math.floor(m/60)} Std ${pad(m%60)} Min`;
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+function ageText(birth) {
+  if (!birth) return '';
+  const b = parseD(birth), n = new Date();
+  let m = (n.getFullYear()-b.getFullYear())*12 + n.getMonth()-b.getMonth();
+  if (n.getDate() < b.getDate()) m--;
+  if (m < 0) return '';
+  if (m < 24) return `${m} Monat${m===1?'':'e'}`;
+  const y = Math.floor(m/12), r = m % 12;
+  return `${y} Jahre` + (r ? ` ${r} Mon.` : '');
+}
+function daysToBirthday(birth) {
+  if (!birth) return null;
+  const b = parseD(birth), n = parseD(today());
+  let next = new Date(n.getFullYear(), b.getMonth(), b.getDate());
+  if (next < n) next = new Date(n.getFullYear()+1, b.getMonth(), b.getDate());
+  return Math.round((next - n) / 864e5);
+}
+function careDays(a, b) { // Werktage ohne Schließtage und eigenen Urlaub aus dem Kalender
+  let c = 0;
+  for (let d = new Date(a); d <= b; d.setDate(d.getDate()+1)) {
+    const w = d.getDay(); if (!w || w > 5) continue;
+    const ds = dstr(d); if (db.events.some(e => (e.type === 'closed' || e.type === 'vacation') && e.date <= ds && (e.end || e.date) >= ds)) continue;
+    c++;
+  }
+  return c;
+}
+function weekdaysBetween(a, b) { // a,b Date, inklusiv
+  let c = 0;
+  for (let d = new Date(a); d <= b; d.setDate(d.getDate()+1)) { const w = d.getDay(); if (w && w < 6) c++; }
+  return c;
+}
+
+/* ---------- Verschlüsselter Speicher ---------- */
+const VAULT = 'kinderstube_vault_v1';
+let db = null, key = null, salt = null, ui = {tab:'heute', month: today().slice(0,7)};
+const b64 = buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i+0x8000)); return btoa(s); };
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(pw, salt) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'}, k, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function decryptVault(v, pw) {
+  const s = unb64(v.salt), k = await deriveKey(pw, s);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv: unb64(v.iv)}, k, unb64(v.data));
+  return {db: JSON.parse(new TextDecoder().decode(pt)), key: k, salt: s};
+}
+async function makeVault() {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(db)));
+  return {v:1, salt: b64(salt), iv: b64(iv), data: b64(ct)};
+}
+let saving = Promise.resolve();
+function save() {
+  saving = saving.then(async () => {
+    if (!db) return;
+    try { localStorage.setItem(VAULT, JSON.stringify(await makeVault())); }
+    catch (e) { alert('Speichern nicht möglich (Speicher voll?). Bitte erstelle ein Backup und lösche ggf. Fotos.'); }
+  });
+  return saving;
+}
+const emptyDb = () => ({children: [], att: [], docs: [], obs: [], events: [], pay: [], fin: [], files: [], shop: [], todo: [], lastBackup: null});
+const norm = () => { db.docs ||= []; db.obs ||= []; db.events ||= []; db.pay ||= []; db.fin ||= []; db.files ||= []; db.shop ||= []; db.todo ||= []; };
+
+/* ---------- Sperrbildschirm ---------- */
+function renderLock(msg = '') {
+  $('#sheet').className = ''; $('#sheet').innerHTML = '';
+  const has = !!localStorage.getItem(VAULT);
+  if (!window.crypto || !crypto.subtle) {
+    $('#app').innerHTML = `<div class="lock"><div class="logo">⚠️</div><h1>Nicht möglich</h1><p>Dieser Browser/diese Adresse unterstützt keine sichere Verschlüsselung. Bitte die App über eine https-Adresse oder als lokale Datei öffnen.</p></div>`;
+    return;
+  }
+  $('#app').innerHTML = `<div class="lock">
+    <div class="logo">🧸</div><h1>Casabambini</h1>
+    <p class="mute">${has ? 'Bitte Passwort eingeben, um die Daten zu öffnen.' : 'Willkommen! Lege zuerst ein Passwort fest. Alle Daten werden damit verschlüsselt und bleiben nur auf diesem Gerät.'}</p>
+    ${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
+    <label for="pw" style="text-align:left">Passwort</label>
+    <input id="pw" type="password" autocomplete="${has ? 'current-password' : 'new-password'}" autofocus>
+    ${has ? '' : `<label for="pw2" style="text-align:left">Passwort wiederholen</label><input id="pw2" type="password" autocomplete="new-password">
+    <div class="alert" style="text-align:left;margin-top:14px">Wichtig: Wer das Passwort vergisst, kommt nicht mehr an die Daten. Es gibt keine Wiederherstellung. Bitte das Passwort sicher notieren und regelmäßig ein Backup machen.</div>`}
+    <div class="btns"><button class="btn go full" data-act="unlock">${has ? 'Öffnen' : 'Passwort festlegen'}</button></div>
+  </div>`;
+}
+async function doUnlock() {
+  const pw = $('#pw').value, has = !!localStorage.getItem(VAULT);
+  if (pw.length < 6) return renderLock('Das Passwort muss mindestens 6 Zeichen haben.');
+  const btn = document.querySelector('[data-act=unlock]'); btn.textContent = 'Einen Moment …'; btn.disabled = true;
+  if (has) {
+    try {
+      const r = await decryptVault(JSON.parse(localStorage.getItem(VAULT)), pw);
+      db = r.db; key = r.key; salt = r.salt;
+    } catch (e) { return renderLock('Falsches Passwort. Bitte nochmal versuchen.'); }
+  } else {
+    if (pw !== $('#pw2').value) return renderLock('Die beiden Passwörter sind nicht gleich.');
+    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(pw, salt);
+    db = emptyDb(); await save();
+  }
+  norm(); ui.tab = 'heute'; touch(); render();
+}
+function lock() { db = null; key = null; closeSheet(); renderLock(); }
+let lockTimer;
+function touch() { clearTimeout(lockTimer); if (db) lockTimer = setTimeout(lock, 10*60*1000); }
+['click','keydown','touchstart'].forEach(e => document.addEventListener(e, touch, {passive:true}));
+
+/* ---------- Daten-Zugriff ---------- */
+const kid = id => db.children.find(c => c.id === id);
+const getAtt = (cid, date) => db.att.find(a => a.child === cid && a.date === date);
+function setAtt(cid, date, patch) {
+  let a = getAtt(cid, date);
+  if (!a) { a = {id: uid(), child: cid, date, type: 'present', in: '', out: ''}; db.att.push(a); }
+  Object.assign(a, patch); save(); return a;
+}
+function delAtt(cid, date) { db.att = db.att.filter(a => !(a.child === cid && a.date === date)); save(); }
+function monthStats(c, ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const first = new Date(y, m-1, 1), last = new Date(y, m, 0);
+  const recs = db.att.filter(a => a.child === c.id && a.date.startsWith(ym));
+  let ist = 0, sick = 0, vac = 0, missing = 0, days = 0;
+  recs.forEach(a => {
+    if (a.type === 'sick') sick++; else if (a.type === 'vacation') vac++;
+    else { if (a.in && a.out) { ist += Math.max(0, mins(a.out) - mins(a.in)); days++; } else if (a.date < today()) missing++; }
+  });
+  const from = c.start && parseD(c.start) > first ? parseD(c.start) : first;
+  const soll = from > last ? 0 : Math.round((+c.hours || 0) * 60 / 5 * careDays(from, last));
+  return {ist, soll, sick, vac, missing, days, recs};
+}
+
+/* ---------- Rendering ---------- */
+function avatar(c, big) {
+  const cls = 'avatar' + (big ? ' big' : '');
+  return c.photo ? `<img class="${cls}" src="${c.photo}" alt="">` : `<div class="${cls}">${esc((c.name || '?').trim().charAt(0).toUpperCase())}</div>`;
+}
+function healthTags(c) {
+  let h = '';
+  if (c.allergies) h += `<span class="tag bad">⚠ Allergie: ${esc(c.allergies)}</span>`;
+  if (c.intolerances) h += `<span class="tag bad">Unverträglich: ${esc(c.intolerances)}</span>`;
+  if (c.meds) h += `<span class="tag bad">💊 ${esc(c.meds)}</span>`;
+  return h;
+}
+function render() {
+  if (!db) return renderLock();
+  const tabs = [['heute','🏠','Heute'],['kinder','👧','Kinder'],['kalender','📅','Kalender'],['stunden','⏱️','Stunden'],['finanzen','💶','Geld'],['mehr','⚙️','Mehr']];
+  const body = {heute: viewHeute, kinder: viewKinder, kalender: viewKalender, stunden: viewStunden, finanzen: viewFinanzen, dok: viewDok, liste: viewListe, mehr: viewMehr}[ui.tab]();
+  $('#app').innerHTML = `<div class="wrap"><div class="brand">🧸 CASABAMBINI</div>${body}</div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+}
+
+function viewHeute() {
+  const t = today(), kids = db.children;
+  const recs = Object.fromEntries(kids.map(c => [c.id, getAtt(c.id, t)]));
+  const here = kids.filter(c => recs[c.id]?.type === 'present' && recs[c.id].in && !recs[c.id].out);
+  const hints = here.filter(c => c.allergies || c.intolerances || c.meds || c.notes);
+  const bdays = kids.map(c => [c, daysToBirthday(c.birth)]).filter(([c, d]) => d !== null && d <= 7);
+  let h = `<h1>Heute</h1><div class="mute">${fmtLong(t)}</div>`;
+  if (!kids.length) return h + `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
+  h += `<div class="info"><b style="font-size:20px">${here.length} von ${kids.length}</b> Kindern sind gerade da.</div>`;
+  if (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5)
+    h += `<div class="alert">💾 Du hast schon länger kein Backup gemacht. <a href="#" data-act="tab" data-v="mehr">Jetzt sichern</a></div>`;
+  if (hints.length) h += `<div class="alert"><b>Wichtige Hinweise für heute</b>${hints.map(c => `<div style="margin-top:6px"><b>${esc(c.name)}:</b> ${[c.allergies && 'Allergie: '+esc(c.allergies), c.intolerances && 'Unverträglich: '+esc(c.intolerances), c.meds && 'Medikamente: '+esc(c.meds), c.notes && esc(c.notes)].filter(Boolean).join(' · ')}</div>`).join('')}</div>`;
+  bdays.forEach(([c, d]) => h += `<div class="info">🎂 ${esc(c.name)} ${d === 0 ? 'hat heute Geburtstag!' : `hat in ${d} Tag${d===1?'':'en'} Geburtstag.`}</div>`);
+  const upc = new Map();
+  for (let i = 0; i <= 7; i++) { const d = new Date(); d.setDate(d.getDate() + i); eventsOn(dstr(d)).forEach(e => { if (!upc.has(e.id)) upc.set(e.id, [i, e]); }); }
+  upc.forEach(([i, e]) => {
+    const cls = e.type === 'closed' && i === 0 ? 'alert' : 'info', w = i === 0 ? 'Heute' : i === 1 ? 'Morgen' : 'In ' + i + ' Tagen';
+    h += `<div class="${cls}" data-act="evedit" data-id="${e.id}" style="cursor:pointer">${EVT[e.type][0]} <b>${w}:</b> ${esc(e.title)}${e.time ? ' um ' + e.time + ' Uhr' : ''}</div>`;
+  });
+  db.files.map(f => [f, docStatus(f)]).filter(([f, s]) => s?.bad).forEach(([f, s]) => h += `<div class="alert" data-act="tab" data-v="dok" style="cursor:pointer">📁 <b>${esc(f.title)}</b>: ${s.t}</div>`);
+  db.todo.filter(x => !x.done && x.due && x.due <= t).forEach(x => h += `<div class="info" data-act="tab" data-v="liste" style="cursor:pointer">✅ <b>${x.due < t ? 'Überfällig' : 'Heute'}:</b> ${esc(x.text)}</div>`);
+  h += `<h2>Kinder</h2>`;
+  kids.forEach(c => {
+    const a = recs[c.id];
+    let status = '', btns = '';
+    if (!a) {
+      status = '<span class="mute">Noch nicht da</span>';
+      btns = `<button class="btn go" data-act="in" data-id="${c.id}">✅ Ist da</button><button class="btn sm" data-act="sick" data-id="${c.id}">🤒 Krank</button><button class="btn sm" data-act="vac" data-id="${c.id}">🏖️ Urlaub</button>`;
+    } else if (a.type !== 'present') {
+      status = `<b>${a.type === 'sick' ? '🤒 Krank heute' : '🏖️ Urlaub heute'}</b>`;
+      btns = `<button class="btn sm" data-act="undo" data-id="${c.id}">↩︎ Rückgängig</button>`;
+    } else if (!a.out) {
+      status = `<b style="color:var(--pri-d)">● Da seit ${a.in} Uhr</b>`;
+      btns = `<button class="btn out" data-act="out" data-id="${c.id}">👋 Wird abgeholt</button><button class="btn sm" data-act="edit" data-id="${c.id}" data-d="${t}">🕐 Zeit ändern</button>`;
+    } else {
+      status = `<b>Abgeholt</b> · ${a.in}–${a.out} Uhr · ${fmtH(Math.max(0, mins(a.out) - mins(a.in)))}`;
+      btns = `<button class="btn sm" data-act="edit" data-id="${c.id}" data-d="${t}">🕐 Zeit ändern</button><button class="btn sm" data-act="undo" data-id="${c.id}">↩︎ Zurücksetzen</button>`;
+    }
+    if (!a || a.type === 'present') btns += `<button class="btn sm" data-act="docopen" data-id="${c.id}" data-d="${t}">📝 Tag dokumentieren</button>`;
+    h += `<div class="card"><div class="row" data-act="view" data-id="${c.id}" style="cursor:pointer">${avatar(c)}<div class="grow"><h3>${esc(c.name)}</h3><div class="mute">${ageText(c.birth)}</div>${status}</div></div>${healthTags(c) ? `<div>${healthTags(c)}</div>` : ''}<div class="btns">${btns}</div></div>`;
+  });
+  return h;
+}
+
+function viewKinder() {
+  let h = `<h1>Kinder</h1>`;
+  if (!db.children.length) h += `<p class="mute">Noch keine Kinder angelegt.</p>`;
+  db.children.slice().sort((a, b) => a.name.localeCompare(b.name, 'de')).forEach(c => {
+    h += `<div class="card"><div class="row" data-act="view" data-id="${c.id}" style="cursor:pointer">${avatar(c)}<div class="grow"><h3>${esc(c.name)}</h3><div class="mute">${ageText(c.birth)}${c.hours ? ' · ' + c.hours + ' Std/Woche' : ''}</div>${healthTags(c)}</div><span style="font-size:24px;color:var(--mute)">›</span></div></div>`;
+  });
+  return h + `<div class="btns"><button class="btn go full" data-act="newkid">➕ Kind hinzufügen</button></div>`;
+}
+
+function viewStunden() {
+  const [y, m] = ui.month.split('-').map(Number);
+  let h = `<h1>Stunden</h1><div class="row" style="margin:8px 0"><button class="btn sm" data-act="mprev" style="flex:none">‹</button><div class="grow" style="text-align:center;font-size:20px;font-weight:700">${MONTHS[m-1]} ${y}</div><button class="btn sm" data-act="mnext" style="flex:none">›</button></div>`;
+  if (!db.children.length) return h + `<p class="mute">Lege zuerst Kinder an.</p>`;
+  db.children.forEach(c => {
+    const s = monthStats(c, ui.month), pct = s.soll ? Math.min(100, Math.round(s.ist / s.soll * 100)) : 0;
+    const diff = s.ist - s.soll;
+    h += `<div class="card" data-act="days" data-id="${c.id}" style="cursor:pointer"><div class="row">${avatar(c)}<div class="grow"><h3>${esc(c.name)}</h3><div class="mute">Ist <b>${fmtH(s.ist)}</b> von ca. ${fmtH(s.soll)}</div></div></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="mini">${s.soll ? (diff >= 0 ? `+${fmtH(diff)} über Vertrag` : `${fmtH(-diff)} unter Vertrag`) : 'Keine Vertragsstunden hinterlegt'}</div>
+    <div>${s.sick ? `<span class="tag">🤒 ${s.sick} Krankheitstag${s.sick===1?'':'e'}</span>` : ''}${s.vac ? `<span class="tag">🏖️ ${s.vac} Urlaubstag${s.vac===1?'':'e'}</span>` : ''}${s.missing ? `<span class="tag bad">⚠ ${s.missing}× Abholzeit fehlt</span>` : ''}</div></div>`;
+  });
+  return h + `<p class="mini">Das Soll ist die Vertragsstunden-Zahl auf die Werktage (Mo–Fr) des Monats umgerechnet; Schließtage und eigener Urlaub aus dem Kalender sind abgezogen, gesetzliche Feiertage nicht (trage sie als Schließtag ein). Tippe auf ein Kind für die einzelnen Tage.</p>`;
+}
+
+function viewMehr() {
+  const exp = db.files.filter(f => docStatus(f)?.bad).length, open = db.todo.filter(x => !x.done).length + db.shop.filter(x => !x.done).length;
+  return `<h1>Mehr</h1>
+  <div class="card" data-act="tab" data-v="dok" style="cursor:pointer"><div class="row"><span style="font-size:30px">📁</span><div class="grow"><h3>Dokumente</h3><div class="mute">Verträge, Pflegeerlaubnis, Nachweise${exp ? ` · <b style="color:var(--bad)">${exp} läuft/laufen ab</b>` : ''}</div></div><span style="font-size:24px;color:var(--mute)">›</span></div></div>
+  <div class="card" data-act="tab" data-v="liste" style="cursor:pointer"><div class="row"><span style="font-size:30px">🛒</span><div class="grow"><h3>Einkauf &amp; Aufgaben</h3><div class="mute">${open ? open + ' offen' : 'Alles erledigt'}</div></div><span style="font-size:24px;color:var(--mute)">›</span></div></div>
+  <div class="card"><h3>💾 Backup</h3><p class="mute">Letztes Backup: ${db.lastBackup ? new Date(db.lastBackup).toLocaleString('de-DE') : 'noch nie'}<br>Die Backup-Datei ist verschlüsselt und nur mit deinem Passwort lesbar. Bewahre sie z. B. auf einem USB-Stick auf.</p>
+  <div class="btns"><button class="btn go" data-act="export">⬇️ Backup erstellen</button><button class="btn" data-act="import">⬆️ Backup einspielen</button></div>
+  <input type="file" id="impfile" accept=".kbk,application/json" hidden></div>
+  <div class="card"><h3>🔒 Sicherheit</h3><div class="btns"><button class="btn" data-act="lock">Jetzt sperren</button><button class="btn" data-act="chpw">Passwort ändern</button></div>
+  <p class="mini">Die App sperrt sich nach 10 Minuten ohne Bedienung automatisch.</p></div>
+  <div class="card"><h3>🛡️ Datenschutz</h3><p class="mute">Alle Daten werden verschlüsselt (AES-256) ausschließlich in diesem Browser auf diesem Gerät gespeichert. Es gibt keinen Server, keine Cloud, keine Werbung und kein Tracking – nichts wird an Dritte weitergegeben. Beachte: Wenn du den Browserspeicher/„Websitedaten" löschst, sind die Daten weg – deshalb regelmäßig ein Backup machen.</p></div>`;
+}
+
+/* ---------- Sheets ---------- */
+function openSheet(html, keep) { const s = $('#sheet'), y = s.scrollTop; s.innerHTML = `<div class="wrap">${html}</div>`; s.className = 'show'; s.scrollTop = keep ? y : 0; }
+function closeSheet() { $('#sheet').className = ''; $('#sheet').innerHTML = ''; D = null; }
+const sheetTop = (title) => `<div class="top"><h1>${title}</h1><button class="x" data-act="close">Schließen</button></div>`;
+
+function childSheet(id) {
+  const c = kid(id); if (!c) return closeSheet();
+  const contacts = (c.contacts || []).map(p => `<div class="card"><div class="row"><div class="grow"><b>${esc(p.name)}</b>${p.emergency ? ' <span class="tag bad">Notfall</span>' : ''}<div class="mute">${esc(p.rel)}${p.phone ? ' · ' + esc(p.phone) : ''}</div></div>${p.phone ? `<a class="btn go" style="flex:none" href="tel:${esc(p.phone.replace(/[^\d+]/g, ''))}">📞 Anrufen</a>` : ''}</div></div>`).join('');
+  const pick = (c.pickup || []).map(p => `<div>• <b>${esc(p.name)}</b>${p.rel ? ' (' + esc(p.rel) + ')' : ''}</div>`).join('');
+  const health = [['Allergien', c.allergies], ['Unverträglichkeiten', c.intolerances], ['Medikamente', c.meds]].filter(x => x[1]);
+  openSheet(`${sheetTop('')}
+  <div style="text-align:center">${avatar(c, true)}<h1>${esc(c.name)}</h1><div class="mute">${ageText(c.birth)}${c.birth ? ' · geboren ' + fmtD(c.birth) : ''}</div></div>
+  ${health.length ? `<div class="alert"><b>⚠ Gesundheit</b>${health.map(([k, v]) => `<div style="margin-top:6px"><b>${k}:</b> ${esc(v)}</div>`).join('')}</div>` : ''}
+  ${c.notes ? `<div class="info"><b>Besonderheiten:</b> ${esc(c.notes)}</div>` : ''}
+  <div class="card"><b>Betreuung seit:</b> ${c.start ? fmtD(c.start) : '–'}<br><b>Vertraglich:</b> ${c.hours ? c.hours + ' Stunden pro Woche' : '–'}</div>
+  <h2>Eltern &amp; Notfallkontakte</h2>${contacts || '<p class="mute">Keine Kontakte hinterlegt.</p>'}
+  <h2>Abholberechtigt</h2><div class="card">${pick || '<span class="mute">Niemand hinterlegt.</span>'}</div>
+  <div class="btns"><button class="btn" data-act="docopen" data-id="${c.id}" data-d="${today()}">📝 Tagesprotokoll</button><button class="btn" data-act="obsopen" data-id="${c.id}">🌱 Beobachtungen</button></div>
+  <div class="btns"><button class="btn go" data-act="editkid" data-id="${c.id}">✏️ Bearbeiten</button><button class="btn bad" data-act="delkid" data-id="${c.id}">🗑️ Löschen</button></div>`);
+}
+
+let D = null; // Entwurf Kinderformular
+function newDraft() { return {id: null, name: '', photo: '', birth: '', start: today(), hours: '', feeP: '', feeJ: '', feeF: '', allergies: '', intolerances: '', meds: '', notes: '', contacts: [{name:'', rel:'Mutter', phone:'', emergency:false}], pickup: []}; }
+function formSheet() {
+  const f = D;
+  openSheet(`${sheetTop(f.id ? 'Kind bearbeiten' : 'Neues Kind')}
+  <div style="text-align:center;margin-top:8px">${avatar(f, true)}<div class="btns" style="justify-content:center"><button class="btn sm" data-act="photo" style="flex:none">📷 Foto wählen</button>${f.photo ? '<button class="btn sm bad" data-act="nophoto" style="flex:none">Foto entfernen</button>' : ''}</div><input type="file" id="photofile" accept="image/*" hidden></div>
+  <label for="f_name">Name *</label><input id="f_name" value="${esc(f.name)}" autocomplete="off">
+  <div class="two"><div><label for="f_birth">Geburtsdatum</label><input id="f_birth" type="date" value="${f.birth}"></div><div><label for="f_start">Betreuungsbeginn</label><input id="f_start" type="date" value="${f.start}"></div></div>
+  <label for="f_hours">Vertragsstunden pro Woche</label><input id="f_hours" type="number" min="0" max="60" step="0.5" inputmode="decimal" value="${esc(f.hours)}" placeholder="z. B. 25">
+  <h2>💶 Monatliche Beträge (€)</h2>
+  <label for="f_feeP">Elternbeitrag</label><input id="f_feeP" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(f.feeP ?? '')}">
+  <label for="f_feeJ">Geldleistung vom Jugendamt</label><input id="f_feeJ" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(f.feeJ ?? '')}">
+  <label for="f_feeF">Essensgeld</label><input id="f_feeF" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(f.feeF ?? '')}">
+  <h2>⚠ Gesundheit</h2>
+  <label for="f_allergies">Allergien</label><input id="f_allergies" value="${esc(f.allergies)}" placeholder="z. B. Nüsse, Hausstaub">
+  <label for="f_intolerances">Unverträglichkeiten</label><input id="f_intolerances" value="${esc(f.intolerances)}" placeholder="z. B. Laktose">
+  <label for="f_meds">Medikamente</label><input id="f_meds" value="${esc(f.meds)}" placeholder="z. B. Asthmaspray bei Bedarf">
+  <label for="f_notes">Besonderheiten</label><textarea id="f_notes" placeholder="z. B. braucht Schnuller zum Einschlafen">${esc(f.notes)}</textarea>
+  <h2>Eltern &amp; Notfallkontakte</h2>
+  ${f.contacts.map((p, i) => `<div class="card"><label style="margin-top:0">Name</label><input data-l="contacts" data-i="${i}" data-f="name" value="${esc(p.name)}"><div class="two"><div><label>Beziehung</label><input data-l="contacts" data-i="${i}" data-f="rel" value="${esc(p.rel)}"></div><div><label>Telefon</label><input data-l="contacts" data-i="${i}" data-f="phone" type="tel" value="${esc(p.phone)}"></div></div>
+  <label style="display:flex;gap:10px;align-items:center;font-weight:500"><input type="checkbox" style="width:26px;min-height:26px" data-l="contacts" data-i="${i}" data-f="emergency" ${p.emergency ? 'checked' : ''}> Notfallkontakt</label>
+  <button class="btn sm bad" data-act="rmrow" data-l="contacts" data-i="${i}" style="margin-top:8px">Entfernen</button></div>`).join('')}
+  <button class="btn full" data-act="addrow" data-l="contacts">➕ Kontakt hinzufügen</button>
+  <h2>Abholberechtigte Personen</h2>
+  ${f.pickup.map((p, i) => `<div class="card"><div class="two"><div><label style="margin-top:0">Name</label><input data-l="pickup" data-i="${i}" data-f="name" value="${esc(p.name)}"></div><div><label style="margin-top:0">Beziehung</label><input data-l="pickup" data-i="${i}" data-f="rel" value="${esc(p.rel)}" placeholder="z. B. Oma"></div></div><button class="btn sm bad" data-act="rmrow" data-l="pickup" data-i="${i}" style="margin-top:8px">Entfernen</button></div>`).join('')}
+  <button class="btn full" data-act="addrow" data-l="pickup">➕ Person hinzufügen</button>
+  <div class="btns" style="margin-top:24px"><button class="btn go" data-act="savekid">💾 Speichern</button><button class="btn" data-act="close">Abbrechen</button></div>`);
+}
+function readForm() {
+  const g = id => $('#' + id)?.value ?? '';
+  Object.assign(D, {name: g('f_name'), birth: g('f_birth'), start: g('f_start'), hours: g('f_hours'), feeP: g('f_feeP'), feeJ: g('f_feeJ'), feeF: g('f_feeF'), allergies: g('f_allergies'), intolerances: g('f_intolerances'), meds: g('f_meds'), notes: g('f_notes')});
+  document.querySelectorAll('input[data-l]').forEach(el => { D[el.dataset.l][+el.dataset.i][el.dataset.f] = el.type === 'checkbox' ? el.checked : el.value; });
+}
+function resizePhoto(file, max = 320) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', .8));
+    };
+    img.onerror = rej; img.src = url;
+  });
+}
+
+function daysSheet(cid) {
+  const c = kid(cid), s = monthStats(c, ui.month), [y, m] = ui.month.split('-').map(Number);
+  const rows = s.recs.slice().sort((a, b) => a.date.localeCompare(b.date)).map(a => {
+    const w = parseD(a.date).toLocaleDateString('de-DE', {weekday: 'short'});
+    const txt = a.type === 'sick' ? '🤒 Krank' : a.type === 'vacation' ? '🏖️ Urlaub' : (a.in ? `${a.in}–${a.out || '?'} Uhr` + (a.out ? ' · ' + fmtH(Math.max(0, mins(a.out) - mins(a.in))) : ' <span class="tag bad">Abholzeit fehlt</span>') : '–');
+    return `<div class="card" data-act="edit" data-id="${cid}" data-d="${a.date}" style="cursor:pointer"><b>${w}, ${fmtD(a.date)}</b><div>${txt}</div></div>`;
+  }).join('');
+  openSheet(`${sheetTop(esc(c.name))}<div class="mute">${MONTHS[m-1]} ${y} · Ist ${fmtH(s.ist)} von ca. ${fmtH(s.soll)}</div>
+  ${rows || '<p class="mute">Keine Einträge in diesem Monat.</p>'}
+  <div class="btns"><button class="btn go" data-act="edit" data-id="${cid}" data-d="">➕ Tag eintragen</button></div>`);
+}
+let E = null;
+function entrySheet(cid, date) {
+  const a = date ? getAtt(cid, date) : null, c = kid(cid);
+  E = {cid, orig: date || ''};
+  const d = date || (ui.month === today().slice(0, 7) ? today() : ui.month + '-01');
+  openSheet(`${sheetTop(esc(c.name))}
+  <label for="e_date">Datum</label><input id="e_date" type="date" value="${d}">
+  <label for="e_type">Art</label><select id="e_type"><option value="present" ${(!a || a.type === 'present') ? 'selected' : ''}>Anwesend</option><option value="sick" ${a?.type === 'sick' ? 'selected' : ''}>Krank</option><option value="vacation" ${a?.type === 'vacation' ? 'selected' : ''}>Urlaub</option></select>
+  <div class="two"><div><label for="e_in">Gebracht um</label><input id="e_in" type="time" value="${a?.in || ''}"></div><div><label for="e_out">Abgeholt um</label><input id="e_out" type="time" value="${a?.out || ''}"></div></div>
+  <div class="btns" style="margin-top:22px"><button class="btn go" data-act="saveentry">💾 Speichern</button>${a ? '<button class="btn bad" data-act="delentry">🗑️ Löschen</button>' : ''}</div>`);
+}
+
+/* ---------- Dokumente ---------- */
+const DCATS = ['Vertrag', 'Pflegeerlaubnis', 'Erste-Hilfe-Nachweis', 'Fortbildung / Zertifikat', 'Versicherung', 'Sonstiges'];
+const daysLeft = d => Math.round((parseD(d) - parseD(today())) / 864e5);
+const plural = n => `${n} Tag${n === 1 ? '' : 'en'}`;
+function docStatus(f) {
+  if (!f.expires) return null;
+  const n = daysLeft(f.expires);
+  return n < 0 ? {t: `Abgelaufen seit ${plural(-n)}`, bad: true} : n <= 60 ? {t: `Läuft in ${plural(n)} ab`, bad: true} : {t: 'Gültig', bad: false};
+}
+const backBtn = `<button class="btn sm" data-act="tab" data-v="mehr" style="flex:none;margin-bottom:6px">‹ Zurück</button>`;
+function viewDok() {
+  const list = db.files.slice().sort((a, b) => (a.expires || '9999').localeCompare(b.expires || '9999'));
+  return `${backBtn}<h1>Dokumente</h1><div class="mute">Du wirst 60 Tage vor Ablauf auf der Heute-Seite erinnert.</div>
+  ${list.map(f => { const s = docStatus(f), o = kid(f.owner); return `<div class="card" data-act="flview" data-id="${f.id}" style="cursor:pointer"><div class="row"><span style="font-size:28px">${f.file?.type === 'application/pdf' ? '📄' : f.file ? '🖼️' : '📋'}</span><div class="grow"><h3>${esc(f.title)}</h3><div class="mute">${esc(f.cat)}${o ? ' · ' + esc(o.name) : ''}</div>${f.expires ? `<span class="tag ${s.bad ? 'bad' : ''}">${s.t} · bis ${fmtD(f.expires)}</span>` : ''}</div></div></div>`; }).join('') || '<p class="mute">Noch keine Dokumente.</p>'}
+  <div class="btns"><button class="btn go full" data-act="flnew">➕ Dokument hinzufügen</button></div>`;
+}
+let FF = null;
+function flForm() {
+  const f = FF;
+  openSheet(`${sheetTop(f.id ? 'Dokument bearbeiten' : 'Neues Dokument')}
+  <label for="g_title">Bezeichnung</label><input id="g_title" value="${esc(f.title)}" placeholder="z. B. Pflegeerlaubnis">
+  <label for="g_cat">Art</label><select id="g_cat">${DCATS.map(c => `<option ${f.cat === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+  <label for="g_owner">Gehört zu</label><select id="g_owner"><option value="">Allgemein (Tagesmutter)</option>${db.children.map(c => `<option value="${c.id}" ${f.owner === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
+  <label for="g_exp">Gültig bis (optional – für die Erinnerung)</label><input id="g_exp" type="date" value="${f.expires}">
+  <label for="g_note">Notiz</label><textarea id="g_note">${esc(f.note)}</textarea>
+  <label>Datei</label>${f.file ? `<div class="info">📎 ${esc(f.file.name)}</div>` : '<div class="mini">Noch keine Datei angehängt.</div>'}
+  <div class="btns" style="margin-top:8px"><button class="btn sm" data-act="flpick">📎 Foto oder PDF wählen</button>${f.file ? '<button class="btn sm bad" data-act="flnofile">Entfernen</button>' : ''}</div><input type="file" id="flfile" accept="image/*,application/pdf" hidden>
+  <div class="btns" style="margin-top:22px"><button class="btn go" data-act="flsave">💾 Speichern</button></div>`);
+}
+function readFl() { FF.title = $('#g_title').value; FF.cat = $('#g_cat').value; FF.owner = $('#g_owner').value; FF.expires = $('#g_exp').value; FF.note = $('#g_note').value; }
+function flSheet(id) {
+  const f = db.files.find(x => x.id === id); if (!f) return closeSheet();
+  const s = docStatus(f), o = kid(f.owner);
+  openSheet(`${sheetTop('')}<h1 style="margin-top:0">${esc(f.title)}</h1><div class="mute">${esc(f.cat)}${o ? ' · ' + esc(o.name) : ''}</div>
+  ${f.expires ? `<div class="${s.bad ? 'alert' : 'info'}"><b>${s.t}</b><br>Gültig bis ${fmtD(f.expires)}</div>` : ''}
+  ${f.note ? `<div class="card">${esc(f.note)}</div>` : ''}
+  ${f.file && f.file.type.startsWith('image/') ? `<img src="${f.file.data}" style="width:100%;border-radius:16px;margin-top:8px">` : ''}
+  <div class="btns">${f.file ? `<button class="btn go" data-act="flopen" data-id="${f.id}">📂 Datei öffnen</button>` : ''}<button class="btn" data-act="fledit" data-id="${f.id}">✏️ Bearbeiten</button><button class="btn bad" data-act="fldel" data-id="${f.id}">🗑️ Löschen</button></div>`);
+}
+function dataToBlob(d) {
+  const [head, b] = d.split(','), bin = atob(b), u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], {type: head.match(/:(.*?);/)[1]});
+}
+const readFile = file => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+
+/* ---------- Einkauf & Aufgaben ---------- */
+function viewListe() {
+  const t = today();
+  const sec = (k, title, icon, ph, extra) => {
+    const items = db[k].slice().sort((a, b) => (a.done - b.done) || (a.due || '9999').localeCompare(b.due || '9999'));
+    return `<h2>${icon} ${title}</h2><div class="card">
+    <div class="row"><input id="${k}_in" placeholder="${ph}" autocomplete="off">${extra || ''}<button class="btn go" data-act="ladd" data-k="${k}" style="flex:none;min-width:56px;padding:0 16px">＋</button></div>
+    ${items.map(x => `<div class="row sub" style="margin-top:0;padding:10px 0"><button class="btn sm ${x.done ? 'go' : ''}" style="flex:none;min-width:48px;padding:0" data-act="ltog" data-k="${k}" data-id="${x.id}">${x.done ? '✓' : ''}</button><div class="grow" style="${x.done ? 'text-decoration:line-through;color:var(--mute)' : ''}">${esc(x.text)}${x.due ? ` <span class="tag ${x.due < t && !x.done ? 'bad' : ''}">${x.due === t ? 'Heute' : fmtD(x.due)}</span>` : ''}</div><button class="x" style="min-height:40px;padding:4px 12px" data-act="ldel" data-k="${k}" data-id="${x.id}">✕</button></div>`).join('') || '<p class="mute" style="margin:12px 0 0">Noch nichts eingetragen.</p>'}
+    ${items.some(x => x.done) ? `<div class="btns"><button class="btn sm" data-act="lclear" data-k="${k}">Erledigte entfernen</button></div>` : ''}</div>`;
+  };
+  return `${backBtn}<h1>Einkauf &amp; Aufgaben</h1>${sec('shop', 'Einkaufsliste', '🛒', 'z. B. Windeln, Obst …')}${sec('todo', 'Aufgaben', '✅', 'z. B. Elternbrief schreiben', '<input id="todo_due" type="date" style="width:150px;flex:none" title="Fällig am (optional)">')}`;
+}
+
+/* ---------- Finanzen ---------- */
+const eur = n => (+n || 0).toLocaleString('de-DE', {style: 'currency', currency: 'EUR'});
+const num = v => parseFloat(String(v ?? '').replace(',', '.')) || 0;
+const FEES = [['feeP', 'parent', 'Elternbeitrag'], ['feeJ', 'jugend', 'Geldleistung Jugendamt'], ['feeF', 'food', 'Essensgeld']];
+const KIND = Object.fromEntries(FEES.map(([, k, l]) => [k, l]));
+const CATS = {out: ['Spielzeug', 'Lebensmittel', 'Bastelmaterial', 'Fortbildung', 'Versicherung', 'Büro & Sonstiges'], in: ['Sonstige Einnahme']};
+const payRec = (cid, ym, k) => db.pay.find(p => p.child === cid && p.month === ym && p.kind === k);
+const monthName = ym => { const [y, m] = ym.split('-').map(Number); return MONTHS[m - 1] + ' ' + y; };
+function viewFinanzen() {
+  ui.fm ||= ui.month;
+  let exp = 0, got = 0, cards = '';
+  db.children.forEach(c => {
+    let rows = '';
+    FEES.forEach(([f, k, l]) => {
+      const a = num(c[f]); if (!a || (c.start && c.start.slice(0, 7) > ui.fm)) return;
+      const p = payRec(c.id, ui.fm, k); exp += a; if (p) got += p.amt;
+      rows += `<div class="row sub"><div class="grow"><b>${l}</b><div class="mute">${eur(a)}</div></div><button class="btn sm ${p ? 'go' : 'bad'}" style="flex:none;min-width:130px" data-act="paytoggle" data-id="${c.id}" data-k="${k}">${p ? '✓ Bezahlt' : 'Offen'}</button></div>`;
+    });
+    cards += `<div class="card"><div class="row">${avatar(c)}<h3 class="grow">${esc(c.name)}</h3></div>${rows || '<p class="mute">Keine Beträge hinterlegt – im Kinderprofil unter „Bearbeiten" eintragen.</p>'}</div>`;
+  });
+  const fin = db.fin.filter(x => x.date.startsWith(ui.fm)).sort((a, b) => b.date.localeCompare(a.date));
+  const out = fin.filter(x => x.type === 'out').reduce((s, x) => s + x.amt, 0);
+  return `<h1>Geld</h1><div class="row" style="margin:8px 0"><button class="btn sm" data-act="fprev" style="flex:none">‹</button><div class="grow" style="text-align:center;font-size:20px;font-weight:700">${monthName(ui.fm)}</div><button class="btn sm" data-act="fnext" style="flex:none">›</button></div>
+  <div class="info"><div class="two"><div>Erwartet<br><b>${eur(exp)}</b></div><div>Eingegangen<br><b>${eur(got)}</b></div></div><div style="margin-top:8px;font-size:19px">Noch offen: <b style="color:${exp - got > 0.004 ? 'var(--bad)' : 'var(--pri-d)'}">${eur(exp - got)}</b></div></div>
+  ${cards || '<p class="mute">Lege zuerst Kinder an.</p>'}
+  <h2>Einnahmen &amp; Ausgaben</h2><div class="mute">Ausgaben im Monat: <b>${eur(out)}</b></div>
+  ${fin.map(x => `<div class="card" data-act="finedit" data-id="${x.id}" style="cursor:pointer"><div class="row"><div class="grow"><b>${fmtD(x.date)}</b> <span class="tag">${esc(x.cat)}</span><div>${esc(x.text)}</div></div>${x.photo ? '<span>🧾</span>' : ''}<b style="color:${x.type === 'out' ? 'var(--bad)' : 'var(--pri-d)'}">${x.type === 'out' ? '−' : '+'}${eur(x.amt)}</b></div></div>`).join('')}
+  <div class="btns"><button class="btn go" data-act="finnew" data-v="out">➕ Ausgabe</button><button class="btn" data-act="finnew" data-v="in">➕ Einnahme</button></div>
+  <div class="btns"><button class="btn full" data-act="yearopen">📊 Jahresübersicht &amp; Export</button></div>`;
+}
+let FD = null;
+function finForm() {
+  const f = FD;
+  openSheet(`${sheetTop(f.id ? 'Eintrag bearbeiten' : 'Neuer Eintrag')}
+  <div class="btns"><button class="btn ${f.type === 'out' ? 'bad' : ''}" data-act="fintype" data-v="out">Ausgabe</button><button class="btn ${f.type === 'in' ? 'go' : ''}" data-act="fintype" data-v="in">Einnahme</button></div>
+  <div class="two"><div><label for="x_date">Datum</label><input id="x_date" type="date" value="${f.date}"></div><div><label for="x_amt">Betrag (€)</label><input id="x_amt" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(f.amt)}"></div></div>
+  <label for="x_cat">Kategorie</label><select id="x_cat">${CATS[f.type].map(c => `<option ${f.cat === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+  <label for="x_text">Beschreibung</label><input id="x_text" value="${esc(f.text)}" placeholder="z. B. Bauklötze, Rewe">
+  <label>Beleg</label>${f.photo ? `<img src="${f.photo}" style="max-width:100%;max-height:260px;border-radius:12px;display:block;margin-bottom:8px">` : ''}
+  <div class="btns" style="margin-top:0"><button class="btn sm" data-act="finphoto">📷 Beleg fotografieren</button>${f.photo ? '<button class="btn sm bad" data-act="finnophoto">Entfernen</button>' : ''}</div><input type="file" id="finfile" accept="image/*" hidden>
+  <div class="btns" style="margin-top:22px"><button class="btn go" data-act="finsave">💾 Speichern</button>${f.id ? '<button class="btn bad" data-act="findel">🗑️ Löschen</button>' : ''}</div>`);
+}
+function readFin() { FD.date = $('#x_date').value; FD.amt = $('#x_amt').value; FD.cat = $('#x_cat').value; FD.text = $('#x_text').value; }
+function yearData(y) {
+  const rows = [];
+  db.pay.filter(p => p.date.startsWith(y)).forEach(p => rows.push([p.date, 'Einnahme', KIND[p.kind], `${p.name} (${monthName(p.month)})`, p.amt]));
+  db.fin.filter(x => x.date.startsWith(y)).forEach(x => rows.push([x.date, x.type === 'in' ? 'Einnahme' : 'Ausgabe', x.cat, x.text, x.amt]));
+  rows.sort((a, b) => a[0].localeCompare(b[0]));
+  const sum = (t, c) => rows.filter(r => r[1] === t && (!c || r[2] === c)).reduce((s, r) => s + r[4], 0);
+  return {rows, sum};
+}
+function yearSheet() {
+  const y = String(ui.fy ||= new Date().getFullYear()), {rows, sum} = yearData(y);
+  const inCats = [...new Set(rows.filter(r => r[1] === 'Einnahme').map(r => r[2]))], outCats = [...new Set(rows.filter(r => r[1] === 'Ausgabe').map(r => r[2]))];
+  openSheet(`${sheetTop('Jahresübersicht')}
+  <div class="row"><button class="btn sm" data-act="yprev" style="flex:none">‹</button><div class="grow" style="text-align:center;font-size:22px;font-weight:700">${y}</div><button class="btn sm" data-act="ynext" style="flex:none">›</button></div>
+  <h2>Casabambini – Einnahmen &amp; Ausgaben ${y}</h2>
+  <table class="t"><tr><th colspan="2">Einnahmen</th></tr>${inCats.map(c => `<tr><td>${esc(c)}</td><td>${eur(sum('Einnahme', c))}</td></tr>`).join('')}<tr class="sum"><td>Summe Einnahmen</td><td>${eur(sum('Einnahme'))}</td></tr></table>
+  <table class="t"><tr><th colspan="2">Ausgaben</th></tr>${outCats.map(c => `<tr><td>${esc(c)}</td><td>${eur(sum('Ausgabe', c))}</td></tr>`).join('')}<tr class="sum"><td>Summe Ausgaben</td><td>${eur(sum('Ausgabe'))}</td></tr></table>
+  <table class="t"><tr class="sum"><td>Überschuss</td><td>${eur(sum('Einnahme') - sum('Ausgabe'))}</td></tr></table>
+  <table class="t"><tr><th>Datum</th><th>Art / Beschreibung</th><th>Betrag</th></tr>${rows.map(r => `<tr><td>${fmtD(r[0])}</td><td>${r[1] === 'Ausgabe' ? '−' : '+'} ${esc(r[2])}<br><span class="mini">${esc(r[3])}</span></td><td>${eur(r[4])}</td></tr>`).join('')}</table>
+  <div class="btns"><button class="btn go" data-act="yexcel">📗 Excel-Datei (CSV)</button><button class="btn" data-act="yprint">🖨️ Als PDF speichern / drucken</button></div>
+  <p class="mini">Zahlungen zählen in dem Jahr, in dem du sie als „Bezahlt" abgehakt hast (Zufluss). Die Übersicht ist eine Hilfe für die Steuererklärung und ersetzt keine Steuerberatung.</p>`);
+}
+
+/* ---------- Kalender ---------- */
+const EVT = {
+  closed: ['🚫', 'Schließtag', '#b8403a'], vacation: ['🏖️', 'Eigener Urlaub', '#d98a3d'], substitute: ['🤝', 'Vertretungszeit', '#4a7fb5'],
+  appointment: ['👪', 'Termin (Elterngespräch, Jugendamt …)', '#4f8a73'], training: ['🎓', 'Fortbildung', '#8a64b0'], other: ['📌', 'Sonstiges', '#6b7a74']
+};
+const eventsOn = date => db.events.filter(e => e.date <= date && (e.end || e.date) >= date).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+const birthdaysOn = date => db.children.filter(c => c.birth && c.birth.slice(5) === date.slice(5));
+let EV = null;
+function viewKalender() {
+  ui.cal ||= ui.month;
+  const [y, m] = ui.cal.split('-').map(Number), n = new Date(y, m, 0).getDate(), lead = (new Date(y, m - 1, 1).getDay() + 6) % 7;
+  let cells = '';
+  for (let i = 0; i < lead; i++) cells += '<button class="void"></button>';
+  for (let d = 1; d <= n; d++) {
+    const ds = `${ui.cal}-${pad(d)}`, ev = eventsOn(ds), bd = birthdaysOn(ds);
+    cells += `<button class="${ds === today() ? 'tod' : ''}" data-act="calday" data-d="${ds}">${d}<div class="dots">${ev.slice(0, 3).map(e => `<i style="background:${EVT[e.type][2]}"></i>`).join('')}${bd.length ? '🎂' : ''}</div></button>`;
+  }
+  const items = [];
+  for (let d = 1; d <= n; d++) {
+    const ds = `${ui.cal}-${pad(d)}`;
+    birthdaysOn(ds).forEach(c => items.push(`<div class="card"><b>${pad(d)}.${pad(m)}.</b> 🎂 ${esc(c.name)} hat Geburtstag${c.birth ? ' (wird ' + (y - +c.birth.slice(0, 4)) + ')' : ''}</div>`));
+  }
+  const evs = db.events.filter(e => e.date.slice(0, 7) <= ui.cal && (e.end || e.date).slice(0, 7) >= ui.cal).sort((a, b) => a.date.localeCompare(b.date));
+  evs.forEach(e => items.push(`<div class="card" data-act="evedit" data-id="${e.id}" style="cursor:pointer;border-left:8px solid ${EVT[e.type][2]}"><b>${fmtD(e.date)}${e.end && e.end !== e.date ? ' – ' + fmtD(e.end) : ''}${e.time ? ' · ' + e.time + ' Uhr' : ''}</b><div>${EVT[e.type][0]} ${esc(e.title)}</div>${e.note ? `<div class="mute">${esc(e.note)}</div>` : ''}</div>`));
+  return `<h1>Kalender</h1><div class="row" style="margin:8px 0"><button class="btn sm" data-act="cprev" style="flex:none">‹</button><div class="grow" style="text-align:center;font-size:20px;font-weight:700">${MONTHS[m - 1]} ${y}</div><button class="btn sm" data-act="cnext" style="flex:none">›</button></div>
+  <div class="cal">${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(x => `<b>${x}</b>`).join('')}${cells}</div>
+  <div class="btns"><button class="btn go full" data-act="evnew" data-d="${ui.cal === today().slice(0, 7) ? today() : ui.cal + '-01'}">➕ Eintrag hinzufügen</button></div>
+  <h2>In diesem Monat</h2>${items.join('') || '<p class="mute">Keine Einträge.</p>'}
+  <p class="mini">Geburtstage kommen automatisch aus den Kinderprofilen. Auf der Heute-Seite wirst du 7 Tage vorher erinnert.</p>`;
+}
+function daySheet(date) {
+  const ev = eventsOn(date), bd = birthdaysOn(date);
+  openSheet(`${sheetTop('')}<h1 style="margin-top:0">${fmtLong(date)}</h1>
+  ${bd.map(c => `<div class="info">🎂 ${esc(c.name)} hat Geburtstag!</div>`).join('')}
+  ${ev.map(e => `<div class="card" data-act="evedit" data-id="${e.id}" style="cursor:pointer;border-left:8px solid ${EVT[e.type][2]}"><b>${EVT[e.type][0]} ${esc(e.title)}</b>${e.time ? ` · ${e.time} Uhr` : ''}${e.note ? `<div class="mute">${esc(e.note)}</div>` : ''}</div>`).join('') || (bd.length ? '' : '<p class="mute">Keine Einträge an diesem Tag.</p>')}
+  <div class="btns"><button class="btn go" data-act="evnew" data-d="${date}">➕ Eintrag hinzufügen</button></div>`);
+}
+function evSheet(id, date) {
+  const e = id ? db.events.find(x => x.id === id) : null; EV = {id, date: e ? e.date : date};
+  openSheet(`${sheetTop(e ? 'Eintrag bearbeiten' : 'Neuer Eintrag')}
+  <label for="v_type">Art</label><select id="v_type">${Object.entries(EVT).map(([k, v]) => `<option value="${k}" ${(e?.type || 'appointment') === k ? 'selected' : ''}>${v[0]} ${v[1]}</option>`).join('')}</select>
+  <label for="v_title">Titel</label><input id="v_title" value="${esc(e?.title || '')}" placeholder="z. B. Elterngespräch Mia">
+  <div class="two"><div><label for="v_date">Von</label><input id="v_date" type="date" value="${EV.date}"></div><div><label for="v_end">Bis (optional)</label><input id="v_end" type="date" value="${e?.end || ''}"></div></div>
+  <label for="v_time">Uhrzeit (optional)</label><input id="v_time" type="time" value="${e?.time || ''}">
+  <label for="v_note">Notiz</label><textarea id="v_note">${esc(e?.note || '')}</textarea>
+  <div class="btns" style="margin-top:22px"><button class="btn go" data-act="evsave">💾 Speichern</button>${e ? '<button class="btn bad" data-act="evdel">🗑️ Löschen</button>' : ''}</div>`);
+}
+
+/* ---------- Tagesdokumentation & Beobachtungen ---------- */
+let DOC = null, OB = null;
+const MOODS = ['😄 Super', '🙂 Gut', '😐 Ruhig', '😢 Weinerlich', '🤒 Unwohl'];
+const AREAS = ['Sprache', 'Motorik', 'Sozialverhalten', 'Selbstständigkeit', 'Spiel & Lernen', 'Sonstiges'];
+const sortT = (arr, k = 't') => arr.sort((a, b) => (a[k] || '').localeCompare(b[k] || ''));
+function getDoc(cid, date, create) {
+  let d = db.docs.find(x => x.child === cid && x.date === date);
+  if (!d && create) { d = {id: uid(), child: cid, date, meals: [], sleeps: [], diapers: [], mood: '', note: '', photos: []}; db.docs.push(d); }
+  return d;
+}
+function saveNote() {
+  const el = $('#d_note'); if (!el || !DOC) return;
+  if (getDoc(DOC.cid, DOC.date, false) || el.value.trim()) { getDoc(DOC.cid, DOC.date, true).note = el.value; save(); }
+}
+function docSheet(cid, date, keep) {
+  DOC = {cid, date};
+  const c = kid(cid), d = getDoc(cid, date, false) || {meals: [], sleeps: [], diapers: [], mood: '', note: '', photos: []};
+  const del = (k, i) => `<button class="btn sm bad" style="flex:none;min-height:36px;padding:2px 12px" data-act="docdel" data-k="${k}" data-i="${i}">✕</button>`;
+  const line = (txt, k, i) => `<div class="row sub" style="margin-top:6px;padding-top:6px"><div class="grow">${txt}</div>${del(k, i)}</div>`;
+  const open = d.sleeps.some(s => !s.to);
+  openSheet(`${sheetTop('📝 ' + esc(c.name))}
+  <div class="row"><button class="btn sm" data-act="docday" data-v="-1" style="flex:none">‹</button><div class="grow" style="text-align:center;font-weight:700">${date === today() ? 'Heute, ' : ''}${fmtD(date)}</div><button class="btn sm" data-act="docday" data-v="1" style="flex:none">›</button></div>
+  <label for="d_time">Uhrzeit für neue Einträge</label><input id="d_time" type="time" value="${date === today() ? nowT() : '12:00'}">
+  <div class="card"><h3>🍽️ Essen &amp; Trinken</h3>
+    <div class="two" style="margin-top:8px"><select id="d_meal"><option>Frühstück</option><option selected>Mittagessen</option><option>Snack</option><option>Obst</option><option>Getränk</option></select><select id="d_amt"><option>alles gegessen</option><option>etwa die Hälfte</option><option>wenig</option><option>nichts</option></select></div>
+    <div class="btns"><button class="btn go" data-act="docmeal">➕ Eintragen</button></div>
+    ${d.meals.map((m, i) => line(`<b>${m.t}</b> ${esc(m.what)} – ${esc(m.amt)}`, 'meals', i)).join('')}</div>
+  <div class="card"><h3>😴 Schlaf</h3>
+    <div class="btns"><button class="btn" data-act="docsleep">😴 Eingeschlafen</button><button class="btn" data-act="docwake" ${open ? '' : 'disabled style="opacity:.5"'}>☀️ Aufgewacht</button></div>
+    ${d.sleeps.map((s, i) => line(`<b>${s.from}</b> – ${s.to ? s.to : '<i>schläft noch</i>'}${s.to ? ' · ' + fmtH(Math.max(0, mins(s.to) - mins(s.from))) : ''}`, 'sleeps', i)).join('')}</div>
+  <div class="card"><h3>🧷 Wickeln / Toilette</h3>
+    <div class="btns"><button class="btn" data-act="docdiaper" data-v="💧 Nass">💧 Nass</button><button class="btn" data-act="docdiaper" data-v="💩 Groß">💩 Groß</button><button class="btn" data-act="docdiaper" data-v="🚽 Töpfchen/Toilette">🚽 Toilette</button></div>
+    ${d.diapers.map((x, i) => line(`<b>${x.t}</b> ${esc(x.kind)}`, 'diapers', i)).join('')}</div>
+  <div class="card"><h3>🙂 Stimmung</h3><div class="btns">${MOODS.map(m => `<button class="btn sm ${d.mood === m ? 'go' : ''}" data-act="docmood" data-v="${m}">${m}</button>`).join('')}</div></div>
+  <div class="card"><h3>✏️ Notiz</h3><textarea id="d_note" placeholder="Was war heute besonders?" style="margin-top:8px">${esc(d.note)}</textarea></div>
+  <div class="card"><h3>📷 Fotos</h3>
+    <div class="btns"><button class="btn sm" data-act="docphoto">📷 Foto hinzufügen</button></div><input type="file" id="docfile" accept="image/*" hidden>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${d.photos.map((p, i) => `<div style="position:relative"><img src="${p}" style="width:110px;height:110px;object-fit:cover;border-radius:12px"><button class="btn sm bad" data-act="docnophoto" data-i="${i}" style="position:absolute;top:4px;right:4px;min-height:32px;padding:0 10px">✕</button></div>`).join('')}</div></div>
+  <div class="btns"><button class="btn go full" data-act="close">✓ Fertig</button></div>`, keep);
+}
+function obsSheet(cid, keep) {
+  OB = cid; const c = kid(cid);
+  const list = db.obs.filter(o => o.child === cid).sort((a, b) => b.date.localeCompare(a.date));
+  openSheet(`${sheetTop('🌱 ' + esc(c.name))}<p class="mute">Entwicklungsbeobachtungen mit Datum – eine gute Grundlage für Elterngespräche.</p>
+  <div class="card"><label style="margin-top:0" for="o_date">Datum</label><input id="o_date" type="date" value="${today()}">
+  <label for="o_area">Bereich</label><select id="o_area">${AREAS.map(a => `<option>${a}</option>`).join('')}</select>
+  <label for="o_text">Beobachtung</label><textarea id="o_text" placeholder="z. B. Hat heute zum ersten Mal allein den Löffel benutzt."></textarea>
+  <div class="btns"><button class="btn go full" data-act="obsadd">➕ Speichern</button></div></div>
+  <h2>Bisherige Beobachtungen</h2>${list.map(o => `<div class="card"><div class="row"><div class="grow"><b>${fmtD(o.date)}</b> <span class="tag">${esc(o.area)}</span><div>${esc(o.text)}</div></div><button class="btn sm bad" style="flex:none" data-act="obsdel" data-id="${o.id}">✕</button></div></div>`).join('') || '<p class="mute">Noch nichts eingetragen.</p>'}`, keep);
+}
+
+/* ---------- Aktionen ---------- */
+const A = {
+  unlock: doUnlock, lock,
+  tab: (el) => { ui.tab = el.dataset.v; closeSheet(); render(); window.scrollTo(0, 0); },
+  close: () => { saveNote(); closeSheet(); E = null; DOC = null; OB = null; EV = null; render(); },
+  flnew: () => { FF = {id: null, title: '', cat: DCATS[0], owner: '', expires: '', note: '', file: null}; flForm(); },
+  fledit: (el) => { FF = JSON.parse(JSON.stringify(db.files.find(x => x.id === el.dataset.id))); flForm(); },
+  flview: (el) => flSheet(el.dataset.id),
+  flnofile: () => { readFl(); FF.file = null; flForm(); },
+  flpick: () => {
+    readFl(); const f = $('#flfile');
+    f.onchange = async () => {
+      const file = f.files[0]; if (!file) return;
+      try {
+        if (file.type.startsWith('image/')) FF.file = {name: file.name, type: 'image/jpeg', data: await resizePhoto(file, 1400)};
+        else if (file.type === 'application/pdf' && file.size <= 2.5e6) FF.file = {name: file.name, type: file.type, data: await readFile(file)};
+        else alert('Bitte ein Foto oder ein PDF bis 2,5 MB wählen.');
+      } catch (e) { alert('Die Datei konnte nicht geladen werden.'); }
+      flForm();
+    };
+    f.click();
+  },
+  flsave: () => {
+    readFl(); if (!FF.title.trim()) FF.title = FF.cat;
+    FF.title = FF.title.trim();
+    if (FF.id) db.files[db.files.findIndex(x => x.id === FF.id)] = FF; else { FF.id = uid(); db.files.push(FF); }
+    const id = FF.id; save(); FF = null; render(); flSheet(id);
+  },
+  fldel: (el) => { if (!confirm('Dokument wirklich löschen?')) return; db.files = db.files.filter(x => x.id !== el.dataset.id); save(); closeSheet(); render(); },
+  flopen: (el) => {
+    const f = db.files.find(x => x.id === el.dataset.id).file, url = URL.createObjectURL(dataToBlob(f.data));
+    const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.download = f.name; a.click();
+  },
+  ladd: (el) => {
+    const k = el.dataset.k, inp = $('#' + k + '_in'), text = inp.value.trim(); if (!text) return inp.focus();
+    db[k].push({id: uid(), text, done: false, due: k === 'todo' ? $('#todo_due').value : ''}); save(); render(); $('#' + k + '_in')?.focus();
+  },
+  ltog: (el) => { const x = db[el.dataset.k].find(i => i.id === el.dataset.id); x.done = !x.done; save(); render(); },
+  ldel: (el) => { db[el.dataset.k] = db[el.dataset.k].filter(i => i.id !== el.dataset.id); save(); render(); },
+  lclear: (el) => { db[el.dataset.k] = db[el.dataset.k].filter(i => !i.done); save(); render(); },
+  fprev: () => shiftFm(-1), fnext: () => shiftFm(1),
+  paytoggle: (el) => {
+    const c = kid(el.dataset.id), k = el.dataset.k, p = payRec(c.id, ui.fm, k);
+    if (p) db.pay = db.pay.filter(x => x !== p);
+    else db.pay.push({id: uid(), child: c.id, name: c.name, month: ui.fm, kind: k, amt: num(c[FEES.find(f => f[1] === k)[0]]), date: today()});
+    save(); render();
+  },
+  finnew: (el) => { FD = {id: null, type: el.dataset.v, date: today(), cat: '', amt: '', text: '', photo: ''}; finForm(); },
+  finedit: (el) => { FD = {...db.fin.find(x => x.id === el.dataset.id)}; finForm(); },
+  fintype: (el) => { readFin(); FD.type = el.dataset.v; FD.cat = ''; finForm(); },
+  finphoto: () => { readFin(); const f = $('#finfile'); f.onchange = async () => { if (!f.files[0]) return; try { FD.photo = await resizePhoto(f.files[0], 900); } catch (e) { alert('Das Foto konnte nicht geladen werden.'); } finForm(); }; f.click(); },
+  finnophoto: () => { readFin(); FD.photo = ''; finForm(); },
+  finsave: () => {
+    readFin(); const amt = num(FD.amt);
+    if (!FD.date || amt <= 0) return alert('Bitte Datum und einen Betrag größer 0 eingeben.');
+    const rec = {...FD, amt, cat: FD.cat || CATS[FD.type][0], text: FD.text.trim()};
+    if (rec.id) db.fin[db.fin.findIndex(x => x.id === rec.id)] = rec; else { rec.id = uid(); db.fin.push(rec); }
+    save(); FD = null; closeSheet(); render();
+  },
+  findel: () => { if (!confirm('Eintrag löschen?')) return; db.fin = db.fin.filter(x => x.id !== FD.id); save(); FD = null; closeSheet(); render(); },
+  yearopen: yearSheet,
+  yprev: () => { ui.fy--; yearSheet(); }, ynext: () => { ui.fy++; yearSheet(); },
+  yprint: () => window.print(),
+  yexcel: () => {
+    const y = String(ui.fy), q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [['Datum', 'Art', 'Kategorie', 'Beschreibung', 'Betrag (EUR)'].join(';')].concat(yearData(y).rows.map(r => [fmtD(r[0]), r[1], q(r[2]), q(r[3]), String(r[4]).replace('.', ',')].join(';')));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'}));
+    a.download = `casabambini-einnahmen-ausgaben-${y}.csv`; a.click();
+  },
+  cprev: () => { shiftCal(-1); }, cnext: () => { shiftCal(1); },
+  calday: (el) => daySheet(el.dataset.d),
+  evnew: (el) => evSheet(null, el.dataset.d),
+  evedit: (el) => evSheet(el.dataset.id),
+  evsave: () => {
+    const type = $('#v_type').value, date = $('#v_date').value, end = $('#v_end').value;
+    if (!date) return alert('Bitte ein Datum wählen.');
+    if (end && end < date) return alert('Das Enddatum liegt vor dem Startdatum.');
+    const rec = {type, title: $('#v_title').value.trim() || EVT[type][1].split(' (')[0], date, end: end && end !== date ? end : '', time: $('#v_time').value, note: $('#v_note').value.trim()};
+    if (EV.id) Object.assign(db.events.find(x => x.id === EV.id), rec); else db.events.push({id: uid(), ...rec});
+    save(); EV = null; ui.cal = date.slice(0, 7); render(); daySheet(date);
+  },
+  evdel: () => { if (!confirm('Eintrag löschen?')) return; const d = EV.date; db.events = db.events.filter(x => x.id !== EV.id); save(); EV = null; render(); daySheet(d); },
+  docopen: (el) => docSheet(el.dataset.id, el.dataset.d),
+  docday: (el) => { saveNote(); const d = parseD(DOC.date); d.setDate(d.getDate() + +el.dataset.v); docSheet(DOC.cid, dstr(d)); },
+  docmeal: () => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true); d.meals.push({t: $('#d_time').value, what: $('#d_meal').value, amt: $('#d_amt').value}); sortT(d.meals); save(); docSheet(DOC.cid, DOC.date, true); },
+  docsleep: () => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true); d.sleeps.push({from: $('#d_time').value, to: ''}); sortT(d.sleeps, 'from'); save(); docSheet(DOC.cid, DOC.date, true); },
+  docwake: () => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true), s = d.sleeps.filter(x => !x.to).pop(); if (s) s.to = $('#d_time').value; save(); docSheet(DOC.cid, DOC.date, true); },
+  docdiaper: (el) => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true); d.diapers.push({t: $('#d_time').value, kind: el.dataset.v}); sortT(d.diapers); save(); docSheet(DOC.cid, DOC.date, true); },
+  docmood: (el) => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true); d.mood = d.mood === el.dataset.v ? '' : el.dataset.v; save(); docSheet(DOC.cid, DOC.date, true); },
+  docdel: (el) => { saveNote(); const d = getDoc(DOC.cid, DOC.date, true); d[el.dataset.k].splice(+el.dataset.i, 1); save(); docSheet(DOC.cid, DOC.date, true); },
+  docphoto: () => { saveNote(); const f = $('#docfile'); f.onchange = async () => { if (!f.files[0]) return; try { getDoc(DOC.cid, DOC.date, true).photos.push(await resizePhoto(f.files[0], 640)); save(); } catch (e) { alert('Das Foto konnte nicht geladen werden.'); } docSheet(DOC.cid, DOC.date, true); }; f.click(); },
+  docnophoto: (el) => { saveNote(); getDoc(DOC.cid, DOC.date, true).photos.splice(+el.dataset.i, 1); save(); docSheet(DOC.cid, DOC.date, true); },
+  obsopen: (el) => obsSheet(el.dataset.id),
+  obsadd: () => {
+    const text = $('#o_text').value.trim(), date = $('#o_date').value;
+    if (!text || !date) return alert('Bitte Datum und eine kurze Beobachtung eingeben.');
+    db.obs.push({id: uid(), child: OB, date, area: $('#o_area').value, text}); save(); obsSheet(OB);
+  },
+  obsdel: (el) => { if (!confirm('Beobachtung löschen?')) return; db.obs = db.obs.filter(o => o.id !== el.dataset.id); save(); obsSheet(OB, true); },
+  newkid: () => { D = newDraft(); formSheet(); },
+  view: (el) => childSheet(el.dataset.id),
+  editkid: (el) => { D = JSON.parse(JSON.stringify(kid(el.dataset.id))); D.hours = D.hours ?? ''; formSheet(); },
+  delkid: (el) => {
+    const c = kid(el.dataset.id);
+    if (!confirm(`„${c.name}" wirklich löschen? Auch alle Anwesenheitseinträge dieses Kindes gehen dabei verloren.`)) return;
+    db.children = db.children.filter(x => x.id !== c.id); db.att = db.att.filter(a => a.child !== c.id); db.docs = db.docs.filter(a => a.child !== c.id); db.obs = db.obs.filter(a => a.child !== c.id); save(); closeSheet(); render();
+  },
+  photo: () => { readForm(); const f = $('#photofile'); f.onchange = async () => { if (f.files[0]) { try { D.photo = await resizePhoto(f.files[0]); } catch (e) { alert('Das Foto konnte nicht geladen werden.'); } formSheet(); } }; f.click(); },
+  nophoto: () => { readForm(); D.photo = ''; formSheet(); },
+  addrow: (el) => { readForm(); D[el.dataset.l].push(el.dataset.l === 'contacts' ? {name:'', rel:'', phone:'', emergency:false} : {name:'', rel:''}); formSheet(); },
+  rmrow: (el) => { readForm(); D[el.dataset.l].splice(+el.dataset.i, 1); formSheet(); },
+  savekid: () => {
+    readForm();
+    if (!D.name.trim()) { alert('Bitte einen Namen eingeben.'); $('#f_name').focus(); return; }
+    D.name = D.name.trim(); D.contacts = D.contacts.filter(p => p.name.trim() || p.phone.trim()); D.pickup = D.pickup.filter(p => p.name.trim());
+    const id = D.id || uid();
+    if (D.id) db.children[db.children.findIndex(c => c.id === D.id)] = D; else { D.id = id; db.children.push(D); }
+    save(); D = null; render(); childSheet(id);
+  },
+  in: (el) => { setAtt(el.dataset.id, today(), {type: 'present', in: nowT(), out: ''}); render(); },
+  out: (el) => { setAtt(el.dataset.id, today(), {out: nowT()}); render(); },
+  sick: (el) => { setAtt(el.dataset.id, today(), {type: 'sick', in: '', out: ''}); render(); },
+  vac: (el) => { setAtt(el.dataset.id, today(), {type: 'vacation', in: '', out: ''}); render(); },
+  undo: (el) => { delAtt(el.dataset.id, today()); render(); },
+  edit: (el) => entrySheet(el.dataset.id, el.dataset.d),
+  days: (el) => daysSheet(el.dataset.id),
+  saveentry: () => {
+    const date = $('#e_date').value, type = $('#e_type').value, tin = $('#e_in').value, tout = $('#e_out').value;
+    if (!date) return alert('Bitte ein Datum wählen.');
+    if (type === 'present' && tin && tout && mins(tout) < mins(tin)) return alert('Die Abholzeit liegt vor der Bringzeit.');
+    if (E.orig && E.orig !== date) delAtt(E.cid, E.orig);
+    setAtt(E.cid, date, {type, in: type === 'present' ? tin : '', out: type === 'present' ? tout : ''});
+    const cid = E.cid; if (date.slice(0, 7) !== ui.month) ui.month = date.slice(0, 7);
+    E = null; render(); daysSheet(cid);
+  },
+  delentry: () => { if (!confirm('Eintrag löschen?')) return; delAtt(E.cid, E.orig); const cid = E.cid; E = null; render(); daysSheet(cid); },
+  mprev: () => shiftMonth(-1), mnext: () => shiftMonth(1),
+  export: async () => {
+    const blob = new Blob([JSON.stringify(await makeVault())], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `casabambini-backup-${today()}.kbk`; a.click();
+    db.lastBackup = Date.now(); save(); render();
+  },
+  import: () => {
+    const f = $('#impfile'); f.value = '';
+    f.onchange = async () => {
+      if (!f.files[0]) return;
+      let v; try { v = JSON.parse(await f.files[0].text()); if (!v.salt || !v.iv || !v.data) throw 0; } catch (e) { return alert('Das ist keine gültige Backup-Datei.'); }
+      const pw = prompt('Passwort, mit dem dieses Backup erstellt wurde:'); if (!pw) return;
+      try {
+        const r = await decryptVault(v, pw);
+        if (!confirm(`Backup enthält ${r.db.children.length} Kind(er). Alle aktuellen Daten werden dadurch ersetzt. Fortfahren?`)) return;
+        db = r.db; key = r.key; salt = r.salt; norm(); await save(); alert('Backup wurde eingespielt. Ab jetzt gilt das Passwort des Backups.'); render();
+      } catch (e) { alert('Falsches Passwort oder beschädigte Datei.'); }
+    };
+    f.click();
+  },
+  chpw: async () => {
+    const p1 = prompt('Neues Passwort (mindestens 6 Zeichen):'); if (!p1) return;
+    if (p1.length < 6) return alert('Zu kurz.');
+    if (prompt('Neues Passwort wiederholen:') !== p1) return alert('Die Passwörter sind nicht gleich.');
+    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(p1, salt); await save(); alert('Passwort geändert. Alte Backups benötigen weiterhin das alte Passwort.');
+  }
+};
+function shiftFm(d) { const [y, m] = ui.fm.split('-').map(Number), n = new Date(y, m - 1 + d, 1); ui.fm = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; render(); }
+function shiftCal(d) { const [y, m] = ui.cal.split('-').map(Number), n = new Date(y, m - 1 + d, 1); ui.cal = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; render(); }
+function shiftMonth(d) { const [y, m] = ui.month.split('-').map(Number), n = new Date(y, m - 1 + d, 1); ui.month = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; render(); }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  if (el.tagName === 'A' && el.getAttribute('href') === '#') e.preventDefault();
+  // Klicks auf Buttons innerhalb klickbarer Karten sollen nicht die Karte öffnen
+  if (el.dataset.act === 'view' || el.dataset.act === 'days') { if (e.target.closest('button,a.btn') ) return; }
+  A[el.dataset.act]?.(el);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  if (!db) doUnlock(); else if (/^(shop|todo)_in$/.test(e.target.id)) A.ladd({dataset: {k: e.target.id.slice(0, 4)}});
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && db) { clearTimeout(lockTimer); lockTimer = setTimeout(lock, 5*60*1000); } else touch(); });
+
+renderLock();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
