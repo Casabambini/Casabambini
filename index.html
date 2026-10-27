@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3f8f78">
+<meta name="theme-color" content="#1d6fd8">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Casabambini">
 <title>Casabambini – Tagespflege</title>
 <style>
-:root{--bg:#f6f7f5;--card:#fff;--ink:#1f2d29;--mute:#74837e;--pri:#3f8f78;--pri-d:#2f705d;--out:#e08a3c;--bad:#c0463f;--bad-bg:#fcefed;--line:#e7eae7;--soft:#eaf4f0;--field:#f1f3f1;--shadow:0 1px 2px rgba(31,45,41,.05),0 6px 18px rgba(31,45,41,.05)}
+:root{--bg:#e9f1fb;--card:#fff;--ink:#14263d;--mute:#6a7d93;--pri:#1d6fd8;--pri-d:#14509e;--out:#e8892e;--bad:#c8433c;--bad-bg:#fdeceb;--line:#e1e9f3;--soft:#e4effd;--field:#eef3fa;--shadow:0 2px 4px rgba(20,60,120,.05),0 10px 24px rgba(20,60,120,.08)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;padding-bottom:96px;-webkit-font-smoothing:antialiased}
@@ -68,6 +68,28 @@ nav button.on span{filter:none;opacity:1}
 table.t{width:100%;border-collapse:collapse;margin:10px 0}.t td,.t th{padding:9px 4px;border-bottom:1px solid var(--line);text-align:left;font-size:15.5px}.t th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}.t td:last-child,.t th:last-child{text-align:right;white-space:nowrap}.t tr.sum td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0}
 @media print{nav,.btns,.x,#app,.brand{display:none!important}#sheet{position:static;overflow:visible;background:#fff;animation:none}body{padding:0;background:#fff}}
 @media (max-width:380px){.two{grid-template-columns:1fr}}
+
+.hero{background:linear-gradient(160deg,#2a82ee 0%,#1559b8 100%);color:#fff;margin:-18px -16px 0;padding:22px 20px 70px;border-radius:0 0 34px 34px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.09)}
+.hero .brand{color:#cfe3ff;margin-bottom:10px}
+.hero h1{color:#fff;margin:0;font-size:30px}
+.hero .mute{color:#d6e7ff}
+.pull{margin-top:-46px;position:relative}
+.pull>.card:first-child,.pull>.info:first-child{margin-top:0}
+.qm{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 8px;background:#fff;border-radius:22px;padding:18px 10px;margin:12px 0;box-shadow:var(--shadow)}
+.qm button{border:0;background:none;font:600 13.5px inherit;font-family:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;padding:0}
+.qm i{font-style:normal;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:27px}
+.big{background:#fff;border-radius:22px;padding:18px;margin:0 0 12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px}
+.big b{font-size:38px;line-height:1;color:var(--pri)}
+nav{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));padding:6px;border-radius:26px;border:0;box-shadow:0 8px 30px rgba(20,60,120,.18);background:rgba(255,255,255,.97)}
+nav button{border-radius:20px}
+nav button.on{background:var(--pri);color:#fff}
+nav button.on span{filter:none;opacity:1}
+body{padding-bottom:110px}
+.lockwrap{min-height:100vh;background:linear-gradient(160deg,#2a82ee,#14509e);display:flex;align-items:center;justify-content:center;padding:20px}
+.lockwrap .lock{background:#fff;border-radius:28px;margin:0;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.btn.go{box-shadow:0 6px 14px rgba(29,111,216,.28)}
+@media print{.hero{display:none!important}}
 </style>
 </head>
 <body>
@@ -161,7 +183,7 @@ function renderLock(msg = '') {
     $('#app').innerHTML = `<div class="lock"><div class="logo">⚠️</div><h1>Nicht möglich</h1><p>Dieser Browser/diese Adresse unterstützt keine sichere Verschlüsselung. Bitte die App über eine https-Adresse oder als lokale Datei öffnen.</p></div>`;
     return;
   }
-  $('#app').innerHTML = `<div class="lock">
+  $('#app').innerHTML = `<div class="lockwrap"><div class="lock">
     <div class="logo">🧸</div><h1>Casabambini</h1>
     <p class="mute">${has ? 'Bitte Passwort eingeben, um die Daten zu öffnen.' : 'Willkommen! Lege zuerst ein Passwort fest. Alle Daten werden damit verschlüsselt und bleiben nur auf diesem Gerät.'}</p>
     ${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
@@ -170,7 +192,7 @@ function renderLock(msg = '') {
     ${has ? '' : `<label for="pw2" style="text-align:left">Passwort wiederholen</label><input id="pw2" type="password" autocomplete="new-password">
     <div class="alert" style="text-align:left;margin-top:14px">Wichtig: Wer das Passwort vergisst, kommt nicht mehr an die Daten. Es gibt keine Wiederherstellung. Bitte das Passwort sicher notieren und regelmäßig ein Backup machen.</div>`}
     <div class="btns"><button class="btn go full" data-act="unlock">${has ? 'Öffnen' : 'Passwort festlegen'}</button></div>
-  </div>`;
+  </div></div>`;
 }
 async function doUnlock() {
   const pw = $('#pw').value, has = !!localStorage.getItem(VAULT);
@@ -232,7 +254,12 @@ function render() {
   if (!db) return renderLock();
   const tabs = [['heute','🏠','Heute'],['kinder','👧','Kinder'],['kalender','📅','Kalender'],['stunden','⏱️','Stunden'],['finanzen','💶','Geld'],['mehr','⚙️','Mehr']];
   const body = {heute: viewHeute, kinder: viewKinder, kalender: viewKalender, stunden: viewStunden, finanzen: viewFinanzen, dok: viewDok, liste: viewListe, mehr: viewMehr}[ui.tab]();
-  $('#app').innerHTML = `<div class="wrap"><div class="brand">🧸 CASABAMBINI</div>${body}</div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+  $('#app').innerHTML = `<div class="wrap"><div class="hero"><div class="brand">🧸 CASABAMBINI</div><div id="herotitle"></div></div><div class="pull">${body}</div></div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+  const h1 = document.querySelector('.pull > h1');
+  if (h1) {
+    const sub = h1.nextElementSibling, t = $('#herotitle'); t.appendChild(h1);
+    if (sub && sub.classList.contains('mute') && ui.tab === 'heute') t.appendChild(sub);
+  }
 }
 
 function viewHeute() {
@@ -243,7 +270,9 @@ function viewHeute() {
   const bdays = kids.map(c => [c, daysToBirthday(c.birth)]).filter(([c, d]) => d !== null && d <= 7);
   let h = `<h1>Heute</h1><div class="mute">${fmtLong(t)}</div>`;
   if (!kids.length) return h + `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
-  h += `<div class="info"><b style="font-size:20px">${here.length} von ${kids.length}</b> Kindern sind gerade da.</div>`;
+  h += `<div class="big"><b>${here.length}/${kids.length}</b><div>Kinder sind gerade da<div class="mute">${here.length ? 'Viel Spaß heute!' : 'Noch niemand eingecheckt'}</div></div></div>`;
+  const qm = [['kinder','👧','Kinder','#dbeafe'],['kalender','📅','Kalender','#dcfce7'],['stunden','⏱️','Stunden','#ffedd5'],['finanzen','💶','Geld','#fef9c3'],['dok','📁','Dokumente','#ede9fe'],['liste','🛒','Einkauf','#fce7f3']];
+  h += `<div class="qm">${qm.map(([v,i,l,c]) => `<button data-act="tab" data-v="${v}"><i style="background:${c}">${i}</i>${l}</button>`).join('')}</div>`;
   if (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5)
     h += `<div class="alert">💾 Du hast schon länger kein Backup gemacht. <a href="#" data-act="tab" data-v="mehr">Jetzt sichern</a></div>`;
   if (hints.length) h += `<div class="alert"><b>Wichtige Hinweise für heute</b>${hints.map(c => `<div style="margin-top:6px"><b>${esc(c.name)}:</b> ${[c.allergies && 'Allergie: '+esc(c.allergies), c.intolerances && 'Unverträglich: '+esc(c.intolerances), c.meds && 'Medikamente: '+esc(c.meds), c.notes && esc(c.notes)].filter(Boolean).join(' · ')}</div>`).join('')}</div>`;
