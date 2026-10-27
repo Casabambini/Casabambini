@@ -312,13 +312,13 @@ function viewHeute() {
   const hints = here.filter(c => c.allergies || c.intolerances || c.meds || c.notes);
   const bdays = kids.map(c => [c, daysToBirthday(c.birth)]).filter(([c, d]) => d !== null && d <= 7);
   let h = `<h1>Heute</h1><div class="mute">${fmtLong(t)}</div>`;
-  if (!kids.length) return h + `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
-  h += `<div class="big"><b>${here.length}/${kids.length}</b><div>Kinder sind gerade da<div class="mute">${here.length ? 'Viel Spaß heute!' : 'Noch niemand eingecheckt'}</div></div></div>`;
+  if (!kids.length) h += `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
+  if (kids.length) h += `<div class="big"><b>${here.length}/${kids.length}</b><div>Kinder sind gerade da<div class="mute">${here.length ? 'Viel Spaß heute!' : 'Noch niemand eingecheckt'}</div></div></div>`;
   const qm = [['kinder','👧','Kinder','#e8efe5'],['kalender','📅','Kalender','#eee4d4'],['stunden','⏱️','Stunden','#f7e8e4'],['finanzen','💶','Geld','#fdf0cc'],['routine','🌿','Tagesplan','#e3ebdc'],['woche','🌱','Wochenplan','#f3e7da'],['hygiene','🧼','Hygiene','#e8efe5'],['ideen','🌈','Ideen','#fdf0cc'],['notizen','📝','Notizen','#eee4d4'],['dok','📁','Dokumente','#f7e8e4'],['liste','🛒','Einkauf','#e3ebdc'],['mehr','💾','Backup','#f3e7da']];
   h += `<div class="qm">${qm.map(([v,i,l,c]) => `<button data-act="tab" data-v="${v}"><i style="background:${c}">${i}</i>${l}</button>`).join('')}</div>`;
   const nxt = planFor(t).filter(x => !x.done).sort((a, b) => (a.time || '').localeCompare(b.time || '')).slice(0, 3);
   h += `<div class="card"><div class="row"><h3 class="grow">Als Nächstes</h3><button class="btn sm" data-act="tab" data-v="routine" style="flex:none">Tagesplan →</button></div>${nxt.map(x => `<div class="row sub" style="margin-top:8px;padding-top:8px"><span class="time">${esc(x.time || '—')}</span><div class="grow">${esc(x.title)}</div></div>`).join('') || '<p class="mute">Alles erledigt 🎉</p>'}</div>`;
-  if (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5)
+  if (kids.length && (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5))
     h += `<div class="alert">💾 Du hast schon länger kein Backup gemacht. <a href="#" data-act="tab" data-v="mehr">Jetzt sichern</a></div>`;
   if (hints.length) h += `<div class="alert"><b>Wichtige Hinweise für heute</b>${hints.map(c => `<div style="margin-top:6px"><b>${esc(c.name)}:</b> ${[c.allergies && 'Allergie: '+esc(c.allergies), c.intolerances && 'Unverträglich: '+esc(c.intolerances), c.meds && 'Medikamente: '+esc(c.meds), c.notes && esc(c.notes)].filter(Boolean).join(' · ')}</div>`).join('')}</div>`;
   bdays.forEach(([c, d]) => h += `<div class="info">🎂 ${esc(c.name)} ${d === 0 ? 'hat heute Geburtstag!' : `hat in ${d} Tag${d===1?'':'en'} Geburtstag.`}</div>`);
@@ -330,7 +330,7 @@ function viewHeute() {
   });
   db.files.map(f => [f, docStatus(f)]).filter(([f, s]) => s?.bad).forEach(([f, s]) => h += `<div class="alert" data-act="tab" data-v="dok" style="cursor:pointer">📁 <b>${esc(f.title)}</b>: ${s.t}</div>`);
   db.todo.filter(x => !x.done && x.due && x.due <= t).forEach(x => h += `<div class="info" data-act="tab" data-v="liste" style="cursor:pointer">✅ <b>${x.due < t ? 'Überfällig' : 'Heute'}:</b> ${esc(x.text)}</div>`);
-  h += `<h2>Kinder</h2>`;
+  if (kids.length) h += `<h2>Kinder</h2>`;
   kids.forEach(c => {
     const a = recs[c.id];
     let status = '', btns = '';
