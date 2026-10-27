@@ -481,6 +481,12 @@ function dataToBlob(d) {
 const readFile = file => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
 
 /* ---------- Einkauf & Aufgaben ---------- */
+function receipts() {
+  const list = db.fin.filter(x => x.photo).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
+  return `<h2>🧾 Belege</h2><div class="card"><div class="mute">Beleg fotografieren: er wird als Ausgabe unter „Geld" gespeichert, mit Foto für die Steuer.</div>
+  <div class="btns"><button class="btn go full" data-act="scan">📷 Beleg scannen</button></div><input type="file" id="scanfile" accept="image/*" capture="environment" hidden>
+  ${list.map(x => `<div class="row sub" data-act="finedit" data-id="${x.id}" style="cursor:pointer"><img src="${x.photo}" style="width:52px;height:64px;object-fit:cover;border-radius:10px;flex:none"><div class="grow"><b>${fmtD(x.date)}</b> <span class="tag">${esc(x.cat)}</span><div class="mute">${esc(x.text)}</div></div><b>${x.type === 'out' ? '−' : '+'}${eur(x.amt)}</b></div>`).join('')}</div>`;
+}
 function viewListe() {
   const t = today();
   const sec = (k, title, icon, ph, extra) => {
@@ -490,7 +496,7 @@ function viewListe() {
     ${items.map(x => `<div class="row sub" style="margin-top:0;padding:10px 0"><button class="btn sm ${x.done ? 'go' : ''}" style="flex:none;min-width:48px;padding:0" data-act="ltog" data-k="${k}" data-id="${x.id}">${x.done ? '✓' : ''}</button><div class="grow" style="${x.done ? 'text-decoration:line-through;color:var(--mute)' : ''}">${esc(x.text)}${x.due ? ` <span class="tag ${x.due < t && !x.done ? 'bad' : ''}">${x.due === t ? 'Heute' : fmtD(x.due)}</span>` : ''}</div><button class="x" style="min-height:40px;padding:4px 12px" data-act="ldel" data-k="${k}" data-id="${x.id}">✕</button></div>`).join('') || '<p class="mute" style="margin:12px 0 0">Noch nichts eingetragen.</p>'}
     ${items.some(x => x.done) ? `<div class="btns"><button class="btn sm" data-act="lclear" data-k="${k}">Erledigte entfernen</button></div>` : ''}</div>`;
   };
-  return `${backBtn}<h1>Einkauf &amp; Aufgaben</h1>${sec('shop', 'Einkaufsliste', '🛒', 'z. B. Windeln, Obst …')}${sec('todo', 'Aufgaben', '✅', 'z. B. Elternbrief schreiben', '<input id="todo_due" type="date" style="width:150px;flex:none" title="Fällig am (optional)">')}`;
+  return `${backBtn}<h1>Einkauf &amp; Aufgaben</h1>${sec('shop', 'Einkaufsliste', '🛒', 'z. B. Windeln, Obst …')}${receipts()}${sec('todo', 'Aufgaben', '✅', 'z. B. Elternbrief schreiben', '<input id="todo_due" type="date" style="width:150px;flex:none" title="Fällig am (optional)">')}`;
 }
 
 /* ---------- Finanzen ---------- */
@@ -693,6 +699,15 @@ const A = {
   ladd: (el) => {
     const k = el.dataset.k, inp = $('#' + k + '_in'), text = inp.value.trim(); if (!text) return inp.focus();
     db[k].push({id: uid(), text, done: false, due: k === 'todo' ? $('#todo_due').value : ''}); save(); render(); $('#' + k + '_in')?.focus();
+  },
+  scan: () => {
+    const f = $('#scanfile');
+    f.onchange = async () => {
+      if (!f.files[0]) return;
+      try { FD = {id: null, type: 'out', date: today(), cat: 'Lebensmittel', amt: '', text: 'Einkauf', photo: await resizePhoto(f.files[0], 1200)}; finForm(); }
+      catch (e) { alert('Das Foto konnte nicht geladen werden.'); }
+    };
+    f.value = ''; f.click();
   },
   ltog: (el) => { const x = db[el.dataset.k].find(i => i.id === el.dataset.id); x.done = !x.done; save(); render(); },
   ldel: (el) => { db[el.dataset.k] = db[el.dataset.k].filter(i => i.id !== el.dataset.id); save(); render(); },
