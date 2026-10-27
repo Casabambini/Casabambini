@@ -189,7 +189,7 @@ function weekdaysBetween(a, b) { // a,b Date, inklusiv
 
 /* ---------- Verschlüsselter Speicher ---------- */
 const VAULT = 'kinderstube_vault_v1';
-let db = null, key = null, salt = null, ui = {tab:'heute', month: today().slice(0,7)};
+let sessPw = null, db = null, key = null, salt = null, ui = {tab:'heute', month: today().slice(0,7)};
 const b64 = buf => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i+0x8000)); return btoa(s); };
 const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function deriveKey(pw, salt) {
@@ -218,6 +218,47 @@ function save() {
 const emptyDb = () => ({children: [], att: [], docs: [], obs: [], events: [], pay: [], fin: [], files: [], shop: [], todo: [], dayplan: {}, chk: {}, customTasks: [], customHyg: [], week: [], notes: {}, phase: '', lastBackup: null});
 const norm = () => { db.docs ||= []; db.obs ||= []; db.events ||= []; db.pay ||= []; db.fin ||= []; db.files ||= []; db.shop ||= []; db.todo ||= []; db.dayplan ||= {}; db.chk ||= {}; db.customTasks ||= []; db.customHyg ||= []; db.week ||= []; db.notes ||= {}; };
 
+
+/* ---------- Face ID / Touch ID (Passkey mit PRF) ---------- */
+const BIO = 'casabambini_bio_v1';
+const bioOn = () => { try { return !!localStorage.getItem(BIO); } catch (e) { return false; } };
+const bioKey = out => crypto.subtle.importKey('raw', out, 'AES-GCM', false, ['encrypt', 'decrypt']);
+async function enableBio() {
+  if (!window.PublicKeyCredential || !navigator.credentials) return alert('Dieses Gerät oder dieser Browser unterstützt Face ID hier nicht. Das Passwort bleibt aktiv.');
+  if (!sessPw) return alert('Bitte öffne die App einmal mit dem Passwort (zuerst sperren), dann kannst du Face ID einschalten.');
+  try {
+    const prfSalt = crypto.getRandomValues(new Uint8Array(32)), ch = () => crypto.getRandomValues(new Uint8Array(32));
+    const cred = await navigator.credentials.create({publicKey: {
+      rp: {name: 'Casa Bambini', id: location.hostname}, user: {id: crypto.getRandomValues(new Uint8Array(16)), name: 'casa-bambini', displayName: 'Casa Bambini'},
+      challenge: ch(), pubKeyCredParams: [{type: 'public-key', alg: -7}, {type: 'public-key', alg: -257}],
+      authenticatorSelection: {authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred'},
+      extensions: {prf: {eval: {first: prfSalt}}}
+    }});
+    const ext = cred.getClientExtensionResults();
+    if (!ext.prf || !ext.prf.enabled) throw new Error('noprf');
+    let out = ext.prf.results && ext.prf.results.first;
+    if (!out) {
+      const a = await navigator.credentials.get({publicKey: {challenge: ch(), rpId: location.hostname, allowCredentials: [{type: 'public-key', id: cred.rawId}], userVerification: 'required', extensions: {prf: {eval: {first: prfSalt}}}}});
+      out = a.getClientExtensionResults().prf?.results?.first;
+    }
+    if (!out) throw new Error('noprf');
+    const iv = crypto.getRandomValues(new Uint8Array(12)), ct = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, await bioKey(out), new TextEncoder().encode(sessPw));
+    localStorage.setItem(BIO, JSON.stringify({id: b64(cred.rawId), salt: b64(prfSalt), iv: b64(iv), ct: b64(ct)}));
+    alert('Face ID ist eingeschaltet. Beim nächsten Öffnen kannst du die App damit entsperren.'); render();
+  } catch (e) {
+    alert(e.message === 'noprf' ? 'Dein Gerät oder Browser kann Face ID für diese App leider nicht sicher nutzen. Das Passwort bleibt aktiv.' : 'Face ID wurde nicht eingerichtet (abgebrochen oder nicht möglich). Das Passwort bleibt aktiv.');
+  }
+}
+async function bioUnlock() {
+  try {
+    const b = JSON.parse(localStorage.getItem(BIO));
+    const a = await navigator.credentials.get({publicKey: {challenge: crypto.getRandomValues(new Uint8Array(32)), rpId: location.hostname, allowCredentials: [{type: 'public-key', id: unb64(b.id)}], userVerification: 'required', extensions: {prf: {eval: {first: unb64(b.salt)}}}}});
+    const out = a.getClientExtensionResults().prf?.results?.first; if (!out) throw 0;
+    const pt = await crypto.subtle.decrypt({name: 'AES-GCM', iv: unb64(b.iv)}, await bioKey(out), unb64(b.ct));
+    await doUnlock(new TextDecoder().decode(pt));
+  } catch (e) { renderLock('Face ID hat nicht geklappt. Bitte das Passwort eingeben.'); }
+}
+
 /* ---------- Sperrbildschirm ---------- */
 function renderLock(msg = '') {
   $('#sheet').className = ''; $('#sheet').innerHTML = '';
@@ -230,6 +271,7 @@ function renderLock(msg = '') {
     <img class="lockimg" src="logo.jpg" alt="Logo Casa Bambini"><h1>Casa Bambini</h1><div class="mini" style="margin-bottom:10px">Ein Haus für kleine Herzen</div>
     <p class="mute">${has ? 'Bitte Passwort eingeben, um die Daten zu öffnen.' : 'Willkommen! Lege zuerst ein Passwort fest. Alle Daten werden damit verschlüsselt und bleiben nur auf diesem Gerät.'}</p>
     ${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
+    ${has && bioOn() ? `<div class="btns"><button class="btn go full" data-act="biounlock">🔓 Mit Face ID öffnen</button></div><div class="mini" style="margin-top:10px">oder mit Passwort:</div>` : ''}
     <label for="pw" style="text-align:left">Passwort</label>
     <input id="pw" type="password" autocomplete="${has ? 'current-password' : 'new-password'}" autofocus>
     ${has ? '' : `<label for="pw2" style="text-align:left">Passwort wiederholen</label><input id="pw2" type="password" autocomplete="new-password">
@@ -237,8 +279,8 @@ function renderLock(msg = '') {
     <div class="btns"><button class="btn go full" data-act="unlock">${has ? 'Öffnen' : 'Passwort festlegen'}</button></div>
   </div></div>`;
 }
-async function doUnlock() {
-  const pw = $('#pw').value, has = !!localStorage.getItem(VAULT);
+async function doUnlock(pwOverride) {
+  const pw = typeof pwOverride === 'string' ? pwOverride : $('#pw').value, has = !!localStorage.getItem(VAULT);
   if (pw.length < 6) return renderLock('Das Passwort muss mindestens 6 Zeichen haben.');
   const btn = document.querySelector('[data-act=unlock]'); btn.textContent = 'Einen Moment …'; btn.disabled = true;
   if (has) {
@@ -251,9 +293,9 @@ async function doUnlock() {
     salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(pw, salt);
     db = emptyDb(); await save();
   }
-  norm(); ui.tab = 'heute'; touch(); render();
+  sessPw = pw; norm(); ui.tab = 'heute'; touch(); render();
 }
-function lock() { db = null; key = null; closeSheet(); renderLock(); }
+function lock() { db = null; key = null; sessPw = null; closeSheet(); renderLock(); }
 let lockTimer;
 function touch() { clearTimeout(lockTimer); if (db) lockTimer = setTimeout(lock, 10*60*1000); }
 ['click','keydown','touchstart'].forEach(e => document.addEventListener(e, touch, {passive:true}));
@@ -386,6 +428,8 @@ function viewMehr() {
   <div class="btns"><button class="btn go" data-act="export">⬇️ Backup erstellen</button><button class="btn" data-act="import">⬆️ Backup einspielen</button></div>
   <input type="file" id="impfile" accept=".kbk,application/json" hidden></div>
   <div class="card"><h3>🔒 Sicherheit</h3><div class="btns"><button class="btn" data-act="lock">Jetzt sperren</button><button class="btn" data-act="chpw">Passwort ändern</button></div>
+  <div class="btns"><button class="btn ${bioOn() ? 'bad' : 'go'}" data-act="${bioOn() ? 'biooff' : 'bioon'}">${bioOn() ? 'Face ID ausschalten' : '🔓 Mit Face ID entsperren'}</button></div>
+  <p class="mini">${bioOn() ? 'Face ID ist an. Das Passwort bleibt als Reserve gültig.' : 'Statt das Passwort jedes Mal einzutippen, entsperrst du die App mit Face ID oder Touch ID. Das Passwort bleibt als Reserve.'}</p>
   <p class="mini">Die App sperrt sich nach 10 Minuten ohne Bedienung automatisch.</p></div>
   <div class="card"><h3>🛡️ Datenschutz</h3><p class="mute">Alle Daten werden verschlüsselt (AES-256) ausschließlich in diesem Browser auf diesem Gerät gespeichert. Es gibt keinen Server, keine Cloud, keine Werbung und kein Tracking – nichts wird an Dritte weitergegeben. Beachte: Wenn du den Browserspeicher/„Websitedaten" löschst, sind die Daten weg – deshalb regelmäßig ein Backup machen.</p></div>`;
 }
@@ -508,7 +552,7 @@ const DAYPLAN=[
 
 const PTYPES = ['Freispiel', 'Morgenkreis', 'Mahlzeit / Trinken', 'Montessori-Angebot', 'Garten / Bewegung', 'Wickeln / Pflege', 'Ruhezeit / Schlafen', 'Zahngesundheit', 'Erste Hilfe / Sicherheit', 'Übergabe', 'Vorbereitung / Nachbereitung', 'Sonstiges'];
 const WAREAS = ['Praktisches Leben', 'Sinne & Farben', 'Sprache', 'Natur', 'Bewegung', 'Zahngesundheit', 'Erste Hilfe', 'Kreativangebot'];
-const WDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+const WDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const curDay = () => ui.day ||= today();
 const planFor = d => db.dayplan[d] || DAYPLAN.map((x, i) => ({id: 'd' + i, time: x[0], type: x[1], title: x[2], note: '', done: false}));
 const ensurePlan = d => db.dayplan[d] ||= planFor(d);
@@ -574,7 +618,7 @@ function viewNotizen() {
   return `${backHeute}<h1>Tagesnotizen</h1>${dayBar()}<div class="card"><label style="margin-top:0" for="notes_in">Notizen für diesen Tag</label><textarea id="notes_in" style="min-height:260px" placeholder="Besonderheiten, Übergaben, Erinnerungen …">${esc(db.notes[curDay()] || '')}</textarea><p class="mini">Wird automatisch gespeichert.</p></div>`;
 }
 const areaOf = c => ({'Jahreszeiten & Basteln': 'Kreativangebot', 'Lied & Fingerspiel': 'Sprache', 'Morgenkreis': 'Sprache', 'Bewegung & Sinne': 'Bewegung', 'Erste Hilfe spielerisch': 'Erste Hilfe', 'Montessori': 'Praktisches Leben'}[c] || (WAREAS.includes(c) ? c : 'Praktisches Leben'));
-const weekDayOf = d => { const n = parseD(d).getDay(); return WDAYS[n >= 1 && n <= 5 ? n - 1 : 0]; };
+const weekDayOf = d => { const n = parseD(d).getDay(); return WDAYS[n >= 1 && n <= 6 ? n - 1 : 0]; };
 let noteTimer;
 
 /* ---------- Dokumente ---------- */
@@ -808,7 +852,8 @@ function obsSheet(cid, keep) {
 
 /* ---------- Aktionen ---------- */
 const A = {
-  unlock: doUnlock, lock,
+  unlock: doUnlock, lock, biounlock: bioUnlock, bioon: enableBio,
+  biooff: () => { try { localStorage.removeItem(BIO); } catch (e) {} render(); },
   tab: (el) => { ui.tab = el.dataset.v; if (['routine', 'hygiene', 'notizen'].includes(ui.tab)) ui.day = today(); closeSheet(); render(); window.scrollTo(0, 0); },
   close: () => { saveNote(); closeSheet(); E = null; DOC = null; OB = null; EV = null; render(); },
   flnew: () => { FF = {id: null, title: '', cat: DCATS[0], owner: '', expires: '', note: '', file: null}; flForm(); },
@@ -997,7 +1042,7 @@ const A = {
     const p1 = prompt('Neues Passwort (mindestens 6 Zeichen):'); if (!p1) return;
     if (p1.length < 6) return alert('Zu kurz.');
     if (prompt('Neues Passwort wiederholen:') !== p1) return alert('Die Passwörter sind nicht gleich.');
-    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(p1, salt); await save(); alert('Passwort geändert. Alte Backups benötigen weiterhin das alte Passwort.');
+    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(p1, salt); sessPw = p1; try { localStorage.removeItem(BIO); } catch (e) {} await save(); alert('Passwort geändert. Face ID wurde ausgeschaltet – du kannst es unter „Mehr“ neu einschalten. Alte Backups benötigen weiterhin das alte Passwort.');
   }
 };
 function shiftFm(d) { const [y, m] = ui.fm.split('-').map(Number), n = new Date(y, m - 1 + d, 1); ui.fm = `${n.getFullYear()}-${pad(n.getMonth() + 1)}`; render(); }
