@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1d6fd8">
+<meta name="theme-color" content="#e8efe5">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Casabambini">
 <title>Casabambini – Tagespflege</title>
 <style>
-:root{--bg:#e9f1fb;--card:#fff;--ink:#14263d;--mute:#6a7d93;--pri:#1d6fd8;--pri-d:#14509e;--out:#e8892e;--bad:#c8433c;--bad-bg:#fdeceb;--line:#e1e9f3;--soft:#e4effd;--field:#eef3fa;--shadow:0 2px 4px rgba(20,60,120,.05),0 10px 24px rgba(20,60,120,.08)}
+:root{--bg:#fbf8f1;--card:#fff;--ink:#27352b;--mute:#6c776e;--pri:#42664a;--pri-d:#42664a;--green2:#6f8d70;--gold:#dfbd78;--sand:#eee4d4;--out:#d9953b;--bad:#9c4036;--bad-bg:#f7e8e4;--line:#e3e7df;--soft:#e8efe5;--field:#f3f4ee;--shadow:0 2px 10px rgba(48,69,43,.07)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;padding-bottom:96px;-webkit-font-smoothing:antialiased}
@@ -90,6 +90,36 @@ body{padding-bottom:110px}
 .lockwrap .lock{background:#fff;border-radius:28px;margin:0;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25)}
 .btn.go{box-shadow:0 6px 14px rgba(29,111,216,.28)}
 @media print{.hero{display:none!important}}
+
+/* Design nach Casa Bambini: Salbeigrün, Creme, Sand, Gold */
+.hero{background:radial-gradient(circle at top left,#fffdf8 0,#f7efdf 48%,#e8efe5 100%);color:var(--ink);border-bottom:2px solid var(--gold);border-radius:0 0 28px 28px;padding:20px 20px 64px}
+.hero:after{display:none}
+.hero .brand{font:italic 600 27px "Snell Roundhand","Segoe Script","Brush Script MT","Apple Chancery",cursive;letter-spacing:0;text-transform:none;color:var(--pri);margin:0}
+.hero .heart{color:var(--gold);font-style:normal;font-size:20px;vertical-align:2px}
+.hero .tagline{font-size:12.5px;letter-spacing:.06em;color:#607461;margin:2px 0 14px}
+.hero h1{color:var(--pri);font-size:26px}
+.hero .mute{color:#607461}
+.big{background:var(--pri);color:#fff;box-shadow:var(--shadow)}
+.big b{color:#fff}.big .mute{color:rgba(255,255,255,.8)}
+.card{border:1px solid var(--line);box-shadow:0 2px 10px rgba(48,69,43,.05)}
+.qm{border:1px solid var(--line);box-shadow:0 2px 10px rgba(48,69,43,.05)}
+.avatar{background:var(--sand);border-radius:16px}
+.avatar.big{border-radius:50%}
+.tag{background:var(--soft);color:var(--pri)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)}
+.alert{color:#7a3a30}
+.info{background:var(--soft);color:#2f4a36}
+.btn{border-radius:14px}
+.btn.go{box-shadow:none}
+.btn.out{background:var(--out)}
+nav{left:0;right:0;bottom:0;border-radius:0;border:0;border-top:1px solid var(--line);box-shadow:none;padding:8px 6px calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96)}
+nav button{border-radius:12px;color:#758077}
+nav button.on{background:var(--soft);color:var(--pri);font-weight:800}
+body{padding-bottom:92px}
+.cal button.tod{background:var(--pri);color:#fff}
+.lockwrap{background:radial-gradient(circle at top left,#fffdf8 0,#f7efdf 48%,#e8efe5 100%)}
+.lockwrap .lock{border:2px solid var(--gold);box-shadow:var(--shadow)}
+.lockwrap .lock h1{font:italic 600 40px "Snell Roundhand","Segoe Script","Brush Script MT","Apple Chancery",cursive;color:var(--pri)}
 </style>
 </head>
 <body>
@@ -184,7 +214,7 @@ function renderLock(msg = '') {
     return;
   }
   $('#app').innerHTML = `<div class="lockwrap"><div class="lock">
-    <div class="logo">🧸</div><h1>Casabambini</h1>
+    <div class="logo">🧸</div><h1>Casabambini</h1><div class="mini" style="margin-bottom:10px">Ein Haus für kleine Herzen</div>
     <p class="mute">${has ? 'Bitte Passwort eingeben, um die Daten zu öffnen.' : 'Willkommen! Lege zuerst ein Passwort fest. Alle Daten werden damit verschlüsselt und bleiben nur auf diesem Gerät.'}</p>
     ${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
     <label for="pw" style="text-align:left">Passwort</label>
@@ -254,7 +284,7 @@ function render() {
   if (!db) return renderLock();
   const tabs = [['heute','🏠','Heute'],['kinder','👧','Kinder'],['kalender','📅','Kalender'],['stunden','⏱️','Stunden'],['finanzen','💶','Geld'],['mehr','⚙️','Mehr']];
   const body = {heute: viewHeute, kinder: viewKinder, kalender: viewKalender, stunden: viewStunden, finanzen: viewFinanzen, dok: viewDok, liste: viewListe, mehr: viewMehr}[ui.tab]();
-  $('#app').innerHTML = `<div class="wrap"><div class="hero"><div class="brand">🧸 CASABAMBINI</div><div id="herotitle"></div></div><div class="pull">${body}</div></div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+  $('#app').innerHTML = `<div class="wrap"><div class="hero"><div class="brand"><span class="heart">♥</span> Casabambini</div><div class="tagline">Ein Haus für kleine Herzen</div><div id="herotitle"></div></div><div class="pull">${body}</div></div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
   const h1 = document.querySelector('.pull > h1');
   if (h1) {
     const sub = h1.nextElementSibling, t = $('#herotitle'); t.appendChild(h1);
@@ -271,7 +301,7 @@ function viewHeute() {
   let h = `<h1>Heute</h1><div class="mute">${fmtLong(t)}</div>`;
   if (!kids.length) return h + `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
   h += `<div class="big"><b>${here.length}/${kids.length}</b><div>Kinder sind gerade da<div class="mute">${here.length ? 'Viel Spaß heute!' : 'Noch niemand eingecheckt'}</div></div></div>`;
-  const qm = [['kinder','👧','Kinder','#dbeafe'],['kalender','📅','Kalender','#dcfce7'],['stunden','⏱️','Stunden','#ffedd5'],['finanzen','💶','Geld','#fef9c3'],['dok','📁','Dokumente','#ede9fe'],['liste','🛒','Einkauf','#fce7f3']];
+  const qm = [['kinder','👧','Kinder','#e8efe5'],['kalender','📅','Kalender','#eee4d4'],['stunden','⏱️','Stunden','#f7e8e4'],['finanzen','💶','Geld','#fdf0cc'],['dok','📁','Dokumente','#e3ebdc'],['liste','🛒','Einkauf','#f3e7da']];
   h += `<div class="qm">${qm.map(([v,i,l,c]) => `<button data-act="tab" data-v="${v}"><i style="background:${c}">${i}</i>${l}</button>`).join('')}</div>`;
   if (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5)
     h += `<div class="alert">💾 Du hast schon länger kein Backup gemacht. <a href="#" data-act="tab" data-v="mehr">Jetzt sichern</a></div>`;
