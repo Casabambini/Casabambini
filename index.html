@@ -8,8 +8,8 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Casabambini">
-<title>Casabambini – Tagespflege</title>
+<meta name="apple-mobile-web-app-title" content="Casa Bambini">
+<title>Casa Bambini – Tagespflege</title>
 <style>
 :root{--bg:#fbf8f1;--card:#fff;--ink:#27352b;--mute:#6c776e;--pri:#42664a;--pri-d:#42664a;--green2:#6f8d70;--gold:#dfbd78;--sand:#eee4d4;--out:#d9953b;--bad:#9c4036;--bad-bg:#f7e8e4;--line:#e3e7df;--soft:#e8efe5;--field:#f3f4ee;--shadow:0 2px 10px rgba(48,69,43,.07)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -120,11 +120,24 @@ body{padding-bottom:92px}
 .lockwrap{background:radial-gradient(circle at top left,#fffdf8 0,#f7efdf 48%,#e8efe5 100%)}
 .lockwrap .lock{border:2px solid var(--gold);box-shadow:var(--shadow)}
 .lockwrap .lock h1{font:italic 600 40px "Snell Roundhand","Segoe Script","Brush Script MT","Apple Chancery",cursive;color:var(--pri)}
+
+.brandrow{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.hero .brandrow .brand{margin:0}.hero .brandrow .tagline{margin:2px 0 0}
+img.logo{width:68px;height:68px;border-radius:50%;border:2px solid var(--gold);background:#fffaf0;object-fit:cover;flex:none;box-shadow:0 2px 10px rgba(128,100,60,.15)}
+img.lockimg{width:150px;height:150px;border-radius:50%;border:2px solid var(--gold);object-fit:cover}
+.cb{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:#fff;font:700 20px inherit;color:#fff;flex:none;cursor:pointer;padding:0}
+.cb.on{background:var(--pri);border-color:var(--pri)}
+.time{font-size:12.5px;font-weight:750;color:var(--pri);background:var(--soft);padding:6px 8px;border-radius:9px;white-space:nowrap;flex:none}
+.qm{grid-template-columns:repeat(4,1fr);gap:14px 4px;padding:16px 6px}
+.qm button{font-size:12px}
+.qm i{width:52px;height:52px;font-size:24px}
+@media print{.hero{display:none!important}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="sheet"></div>
+<script src="ideen.js"></script>
 <script>
 "use strict";
 /* ---------- Helfer ---------- */
@@ -202,8 +215,8 @@ function save() {
   });
   return saving;
 }
-const emptyDb = () => ({children: [], att: [], docs: [], obs: [], events: [], pay: [], fin: [], files: [], shop: [], todo: [], lastBackup: null});
-const norm = () => { db.docs ||= []; db.obs ||= []; db.events ||= []; db.pay ||= []; db.fin ||= []; db.files ||= []; db.shop ||= []; db.todo ||= []; };
+const emptyDb = () => ({children: [], att: [], docs: [], obs: [], events: [], pay: [], fin: [], files: [], shop: [], todo: [], dayplan: {}, chk: {}, customTasks: [], customHyg: [], week: [], notes: {}, phase: '', lastBackup: null});
+const norm = () => { db.docs ||= []; db.obs ||= []; db.events ||= []; db.pay ||= []; db.fin ||= []; db.files ||= []; db.shop ||= []; db.todo ||= []; db.dayplan ||= {}; db.chk ||= {}; db.customTasks ||= []; db.customHyg ||= []; db.week ||= []; db.notes ||= {}; };
 
 /* ---------- Sperrbildschirm ---------- */
 function renderLock(msg = '') {
@@ -214,7 +227,7 @@ function renderLock(msg = '') {
     return;
   }
   $('#app').innerHTML = `<div class="lockwrap"><div class="lock">
-    <div class="logo">🧸</div><h1>Casabambini</h1><div class="mini" style="margin-bottom:10px">Ein Haus für kleine Herzen</div>
+    <img class="lockimg" src="logo.jpg" alt="Logo Casa Bambini"><h1>Casa Bambini</h1><div class="mini" style="margin-bottom:10px">Ein Haus für kleine Herzen</div>
     <p class="mute">${has ? 'Bitte Passwort eingeben, um die Daten zu öffnen.' : 'Willkommen! Lege zuerst ein Passwort fest. Alle Daten werden damit verschlüsselt und bleiben nur auf diesem Gerät.'}</p>
     ${msg ? `<div class="alert">${esc(msg)}</div>` : ''}
     <label for="pw" style="text-align:left">Passwort</label>
@@ -283,8 +296,8 @@ function healthTags(c) {
 function render() {
   if (!db) return renderLock();
   const tabs = [['heute','🏠','Heute'],['kinder','👧','Kinder'],['kalender','📅','Kalender'],['stunden','⏱️','Stunden'],['finanzen','💶','Geld'],['mehr','⚙️','Mehr']];
-  const body = {heute: viewHeute, kinder: viewKinder, kalender: viewKalender, stunden: viewStunden, finanzen: viewFinanzen, dok: viewDok, liste: viewListe, mehr: viewMehr}[ui.tab]();
-  $('#app').innerHTML = `<div class="wrap"><div class="hero"><div class="brand"><span class="heart">♥</span> Casabambini</div><div class="tagline">Ein Haus für kleine Herzen</div><div id="herotitle"></div></div><div class="pull">${body}</div></div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+  const body = {heute: viewHeute, kinder: viewKinder, kalender: viewKalender, stunden: viewStunden, finanzen: viewFinanzen, dok: viewDok, liste: viewListe, routine: viewRoutine, woche: viewWoche, hygiene: viewHygiene, ideen: viewIdeen, notizen: viewNotizen, mehr: viewMehr}[ui.tab]();
+  $('#app').innerHTML = `<div class="wrap"><div class="hero"><div class="brandrow"><img class="logo" src="logo.jpg" alt="Logo Casa Bambini"><div><div class="brand">Casa Bambini</div><div class="tagline">Ein Haus für kleine Herzen</div></div></div><div id="herotitle"></div></div><div class="pull">${body}</div></div><nav>${tabs.map(([k,i,l]) => `<button class="${ui.tab===k || (k==='mehr' && ['dok','liste'].includes(ui.tab)) || (k==='heute' && ['routine','woche','hygiene','ideen','notizen'].includes(ui.tab)) ?'on':''}" data-act="tab" data-v="${k}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
   const h1 = document.querySelector('.pull > h1');
   if (h1) {
     const sub = h1.nextElementSibling, t = $('#herotitle'); t.appendChild(h1);
@@ -301,8 +314,10 @@ function viewHeute() {
   let h = `<h1>Heute</h1><div class="mute">${fmtLong(t)}</div>`;
   if (!kids.length) return h + `<div class="card"><h3>Willkommen 👋</h3><p>Lege zuerst die Kinder an, die du betreust. Danach kannst du sie jeden Morgen mit einem Tipp „einchecken".</p><button class="btn go full" data-act="newkid">➕ Erstes Kind anlegen</button></div>`;
   h += `<div class="big"><b>${here.length}/${kids.length}</b><div>Kinder sind gerade da<div class="mute">${here.length ? 'Viel Spaß heute!' : 'Noch niemand eingecheckt'}</div></div></div>`;
-  const qm = [['kinder','👧','Kinder','#e8efe5'],['kalender','📅','Kalender','#eee4d4'],['stunden','⏱️','Stunden','#f7e8e4'],['finanzen','💶','Geld','#fdf0cc'],['dok','📁','Dokumente','#e3ebdc'],['liste','🛒','Einkauf','#f3e7da']];
+  const qm = [['kinder','👧','Kinder','#e8efe5'],['kalender','📅','Kalender','#eee4d4'],['stunden','⏱️','Stunden','#f7e8e4'],['finanzen','💶','Geld','#fdf0cc'],['routine','🌿','Tagesplan','#e3ebdc'],['woche','🌱','Wochenplan','#f3e7da'],['hygiene','🧼','Hygiene','#e8efe5'],['ideen','🌈','Ideen','#fdf0cc'],['notizen','📝','Notizen','#eee4d4'],['dok','📁','Dokumente','#f7e8e4'],['liste','🛒','Einkauf','#e3ebdc'],['mehr','💾','Backup','#f3e7da']];
   h += `<div class="qm">${qm.map(([v,i,l,c]) => `<button data-act="tab" data-v="${v}"><i style="background:${c}">${i}</i>${l}</button>`).join('')}</div>`;
+  const nxt = planFor(t).filter(x => !x.done).sort((a, b) => (a.time || '').localeCompare(b.time || '')).slice(0, 3);
+  h += `<div class="card"><div class="row"><h3 class="grow">Als Nächstes</h3><button class="btn sm" data-act="tab" data-v="routine" style="flex:none">Tagesplan →</button></div>${nxt.map(x => `<div class="row sub" style="margin-top:8px;padding-top:8px"><span class="time">${esc(x.time || '—')}</span><div class="grow">${esc(x.title)}</div></div>`).join('') || '<p class="mute">Alles erledigt 🎉</p>'}</div>`;
   if (db.lastBackup === null || (Date.now() - db.lastBackup) > 14*864e5)
     h += `<div class="alert">💾 Du hast schon länger kein Backup gemacht. <a href="#" data-act="tab" data-v="mehr">Jetzt sichern</a></div>`;
   if (hints.length) h += `<div class="alert"><b>Wichtige Hinweise für heute</b>${hints.map(c => `<div style="margin-top:6px"><b>${esc(c.name)}:</b> ${[c.allergies && 'Allergie: '+esc(c.allergies), c.intolerances && 'Unverträglich: '+esc(c.intolerances), c.meds && 'Medikamente: '+esc(c.meds), c.notes && esc(c.notes)].filter(Boolean).join(' · ')}</div>`).join('')}</div>`;
@@ -464,6 +479,104 @@ function entrySheet(cid, date) {
   <div class="btns" style="margin-top:22px"><button class="btn go" data-act="saveentry">💾 Speichern</button>${a ? '<button class="btn bad" data-act="delentry">🗑️ Löschen</button>' : ''}</div>`);
 }
 
+const PHASES=['Ankommen','Vormittag','Mittag','Abschluss','Nachbereitung'];
+const PHASE_DEF={
+'Ankommen':[['08:00','Räume kurz lüften und vorbereiten'],['08:00','Montessori-Materialien bereitstellen'],['08:00','Kinder begrüßen und Übergabe mit Eltern'],['08:30','Freispiel begleiten und beobachten']],
+'Vormittag':[['09:00','Morgenkreis und Begrüßungslied'],['09:15','Hände waschen und Essen nach Absprache'],['09:30','Freie Montessori-Angebote'],['10:30','Garten, Bewegung oder Spaziergang'],['11:15','Hände waschen und Mittagessen vorbereiten']],
+'Mittag':[['11:30','Mittagessen und Selbstständigkeit fördern'],['12:00','Zähneputzen / Mundhygiene'],['12:15','Wickeln und Toilettengänge nach Bedarf'],['12:30','Ruhezeit, Vorlesen oder Schlafen']],
+'Abschluss':[['13:30','Sanftes Aufwachen und ruhiges Freispiel'],['13:45','Gemeinsam Spielmaterial aufräumen'],['14:00','Abholbereitschaft und Übergabe vorbereiten'],['14:00','Kurze Rückmeldung an Eltern'],['14:30','Tagesabschluss']],
+'Nachbereitung':[['14:30','Benutzte Flächen und Materialien reinigen'],['14:30','Wickelbereich und Küche kontrollieren'],['14:30','Beobachtungen / Besonderheiten nach Vorgaben dokumentieren'],['14:30','Material für den nächsten Betreuungstag vorbereiten']]
+};
+const HYG=['Hände waschen: Kinder und Betreuungsperson','Wickelplatz sauber und vorbereitet','Küche und Essbereich sauber','Trinkwasser und persönliche Trinkgefäße prüfen','Spielbereiche auf Gefahren kontrollieren','Benutzte Materialien reinigen','Abfall entsorgen und Räume lüften'];
+const SAFE=['Erste-Hilfe-Material und Notfallkontakte kontrollieren','Fluchtwege und Türen frei halten','Außenbereich / Spielgeräte auf erkennbare Gefahren prüfen'];
+const DAYPLAN=[
+ ['08:00','Ankommen','Kinder begrüßen und Übergabe mit Eltern'],
+ ['08:15','Freispiel','Ankommen, orientieren und frei spielen'],
+ ['09:00','Morgenkreis','Begrüßung, Wetter und Gefühle'],
+ ['09:15','Mahlzeit / Trinken','Hände waschen und Trinkangebote begleiten'],
+ ['09:30','Montessori-Angebot','Vorbereitete Materialien frei wählen'],
+ ['10:30','Garten / Bewegung','Draußen spielen oder Bewegung im Haus'],
+ ['11:15','Mahlzeit / Trinken','Hände waschen und Mittagessen vorbereiten'],
+ ['11:30','Mahlzeit / Trinken','Gemeinsame Mahlzeit und Selbstständigkeit'],
+ ['12:00','Zahngesundheit','Mundhygiene nach dem vereinbarten Tagesablauf'],
+ ['12:15','Wickeln / Pflege','Pflege und Toilettengänge nach Bedarf'],
+ ['12:30','Ruhezeit / Schlafen','Vorlesen, Schlafen oder ruhige Beschäftigung'],
+ ['13:30','Freispiel','Sanftes Aufwachen und ruhiges Spielen'],
+ ['14:00','Übergabe','Abholbereitschaft und kurze Rückmeldung an Eltern'],
+ ['14:30','Vorbereitung / Nachbereitung','Materialien ordnen und Räume kontrollieren']
+];
+
+const PTYPES = ['Freispiel', 'Morgenkreis', 'Mahlzeit / Trinken', 'Montessori-Angebot', 'Garten / Bewegung', 'Wickeln / Pflege', 'Ruhezeit / Schlafen', 'Zahngesundheit', 'Erste Hilfe / Sicherheit', 'Übergabe', 'Vorbereitung / Nachbereitung', 'Sonstiges'];
+const WAREAS = ['Praktisches Leben', 'Sinne & Farben', 'Sprache', 'Natur', 'Bewegung', 'Zahngesundheit', 'Erste Hilfe', 'Kreativangebot'];
+const WDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+const curDay = () => ui.day ||= today();
+const planFor = d => db.dayplan[d] || DAYPLAN.map((x, i) => ({id: 'd' + i, time: x[0], type: x[1], title: x[2], note: '', done: false}));
+const ensurePlan = d => db.dayplan[d] ||= planFor(d);
+const dayBar = () => `<div class="row" style="margin:6px 0 10px"><button class="btn sm" data-act="dday" data-v="-1" style="flex:none">‹</button><div class="grow" style="text-align:center;font-weight:700">${curDay() === today() ? 'Heute, ' : ''}${fmtD(curDay())}</div><button class="btn sm" data-act="dday" data-v="1" style="flex:none">›</button></div>`;
+const backHeute = `<button class="btn sm" data-act="tab" data-v="heute" style="flex:none;margin-bottom:6px">‹ Zurück</button>`;
+const cb = (on, attrs) => `<button class="cb ${on ? 'on' : ''}" ${attrs} aria-label="${on ? 'erledigt' : 'offen'}">${on ? '✓' : ''}</button>`;
+const xbtn = attrs => `<button class="x" style="min-height:40px;padding:4px 12px" ${attrs} aria-label="Löschen">✕</button>`;
+const strike = on => on ? 'text-decoration:line-through;color:var(--mute)' : '';
+
+function viewRoutine() {
+  const d = curDay(), items = planFor(d).slice().sort((a, b) => (a.time || '').localeCompare(b.time || '')), done = items.filter(x => x.done).length;
+  const ph = db.phase || PHASES[0];
+  const tasks = [...PHASE_DEF[ph].map(x => ({time: x[0], text: x[1], custom: false})), ...db.customTasks.filter(t => t.phase === ph).map(t => ({time: t.time, text: t.text, custom: true}))];
+  const tdone = tasks.filter(t => db.chk[d + '|' + t.text]).length;
+  return `${backHeute}<h1>Tagesplan</h1>${dayBar()}
+  <div class="card"><div class="row"><h3 class="grow">🌿 Mein Tagesablauf</h3><span class="tag" style="margin:0">${done}/${items.length} erledigt</span></div><div class="bar"><i style="width:${items.length ? done / items.length * 100 : 0}%"></i></div>
+  ${items.map(x => `<div class="row sub" style="margin-top:0;padding:10px 0;align-items:flex-start">${cb(x.done, `data-act="rpdone" data-id="${x.id}"`)}<span class="time">${esc(x.time || '—')}</span><div class="grow" style="${strike(x.done)}"><b>${esc(x.title)}</b><div class="mini">${esc(x.type || '')}</div>${x.note ? `<div class="mini" style="white-space:pre-wrap">${esc(x.note)}</div>` : ''}</div>${xbtn(`data-act="rpdel" data-id="${x.id}"`)}</div>`).join('') || '<p class="mute">Noch keine Programmpunkte.</p>'}</div>
+  <div class="card"><h3>＋ Programmpunkt hinzufügen</h3>
+  <div class="two"><div><label for="rp_time">Uhrzeit</label><input id="rp_time" type="time"></div><div><label for="rp_type">Bereich</label><select id="rp_type">${PTYPES.map(t => `<option>${t}</option>`).join('')}</select></div></div>
+  <label for="rp_title">Was ist geplant?</label><input id="rp_title"><label for="rp_note">Notiz / Material (optional)</label><textarea id="rp_note" style="min-height:64px"></textarea>
+  <div class="btns"><button class="btn go full" data-act="rpadd">＋ Im Tagesplan speichern</button></div></div>
+  <h2>Checkliste</h2><div class="card"><div class="btns" style="margin:0 0 10px">${PHASES.map(p => `<button class="btn sm ${p === ph ? 'go' : ''}" data-act="rphase" data-v="${p}" style="flex:none">${p}</button>`).join('')}</div>
+  <div class="row"><b class="grow">${ph}</b><span class="mini">${tdone}/${tasks.length} erledigt</span></div><div class="bar"><i style="width:${tasks.length ? tdone / tasks.length * 100 : 0}%"></i></div>
+  ${tasks.map(t => { const on = !!db.chk[d + '|' + t.text]; return `<div class="row sub" style="margin-top:0;padding:10px 0">${cb(on, `data-act="rtchk" data-t="${esc(t.text)}"`)}<span class="time">${esc(t.time || 'Flexibel')}</span><div class="grow" style="${strike(on)}">${esc(t.text)}</div>${t.custom ? xbtn(`data-act="rtdel" data-t="${esc(t.text)}"`) : ''}</div>`; }).join('')}
+  <div class="row" style="margin-top:12px"><input id="rt_text" placeholder="Neue Aufgabe" class="grow"><input id="rt_time" type="time" style="width:120px;flex:none"><button class="btn go" data-act="rtadd" style="flex:none;min-width:52px;padding:0 14px">＋</button></div>
+  <div class="btns"><button class="btn sm" data-act="rtreset">Häkchen für diesen Tag zurücksetzen</button></div></div>`;
+}
+
+function viewWoche() {
+  const w = ui.wd || {day: WDAYS[0], area: WAREAS[0], title: '', note: ''};
+  return `${backHeute}<h1>Wochenplan</h1><div class="mute">Montessori: kleine, vorbereitete Angebote passend zum Alter und Interesse der Kinder.</div>
+  <div class="card"><div class="two"><div><label for="w_day">Wochentag</label><select id="w_day">${WDAYS.map(x => `<option ${w.day === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div><div><label for="w_area">Bereich</label><select id="w_area">${WAREAS.map(x => `<option ${w.area === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div></div>
+  <label for="w_title">Angebot / Material</label><input id="w_title" value="${esc(w.title)}"><label for="w_note">Vorbereitung / Beobachtung</label><textarea id="w_note">${esc(w.note)}</textarea>
+  <div class="btns"><button class="btn go full" data-act="wadd">＋ Wochenidee speichern</button></div></div>
+  ${WDAYS.map(day => { const l = db.week.filter(x => x.day === day); return `<h2>${day}</h2>` + (l.map(x => `<div class="card"><div class="row" style="align-items:flex-start"><div class="grow"><span class="tag" style="margin:0 0 6px">${esc(x.area)}</span><div><b>${esc(x.title)}</b></div>${x.note ? `<div class="mini" style="white-space:pre-wrap">${esc(x.note)}</div>` : ''}</div>${xbtn(`data-act="wdel" data-id="${x.id}"`)}</div></div>`).join('') || '<p class="mini">Noch nichts geplant.</p>'); }).join('')}
+  <div class="btns"><button class="btn full" data-act="tab" data-v="ideen">🌈 Ideen aus der Schatzkiste holen</button></div>`;
+}
+
+function viewHygiene() {
+  const d = curDay(), list = [...HYG.map(t => [t, false]), ...db.customHyg.map(t => [t, true])];
+  const row = ([t, custom]) => { const on = !!db.chk['h' + d + '|' + t]; return `<div class="row sub" style="margin-top:0;padding:10px 0">${cb(on, `data-act="hchk" data-t="${esc(t)}"`)}<div class="grow" style="${strike(on)}">${esc(t)}</div>${custom ? xbtn(`data-act="hdel" data-t="${esc(t)}"`) : ''}</div>`; };
+  const done = list.filter(([t]) => db.chk['h' + d + '|' + t]).length;
+  return `${backHeute}<h1>Hygiene & Sicherheit</h1><div class="mute">Alltagscheck für den ausgewählten Tag. Ergänze deine verbindlichen Vorgaben separat.</div>${dayBar()}
+  <div class="card"><div class="row"><h3 class="grow">Täglicher Check</h3><span class="tag" style="margin:0">${done}/${list.length}</span></div><div class="bar"><i style="width:${done / list.length * 100}%"></i></div>${list.map(row).join('')}
+  <div class="row" style="margin-top:12px"><input id="h_new" placeholder="Zusätzliche Aufgabe" class="grow"><button class="btn go" data-act="hadd" style="flex:none;min-width:52px;padding:0 14px">＋</button></div></div>
+  <div class="card"><h3>Sicherheit</h3>${SAFE.map(t => row([t, false])).join('')}</div>
+  <div class="info">Bei Desinfektionsmitteln, Lebensmitteln, Medikamenten und Notfallmaßnahmen stets die geltenden Hygiene-, Sicherheits- und Datenschutzvorgaben beachten.</div>`;
+}
+
+function viewIdeen() {
+  const lib = typeof activityLibrary !== 'undefined' ? activityLibrary : [], circ = typeof weekdayCircle !== 'undefined' ? weekdayCircle : {};
+  const dd = parseD(curDay()), day = circ[String(dd.getDay())] || circ['1'];
+  const cats = ['Alle', ...new Set(lib.map(a => a.cat))], q = (ui.iq || '').toLocaleLowerCase('de-DE'), cat = ui.icat || 'Alle', age = ui.iage || 'Alle';
+  const list = lib.map((a, i) => [a, i]).filter(([a]) => (cat === 'Alle' || a.cat === cat) && (!q || (a.title + ' ' + a.cat + ' ' + a.season + ' ' + a.how + ' ' + a.materials).toLocaleLowerCase('de-DE').includes(q)) && (age === 'Alle' || a.age.includes(age) || a.age === '1–6'));
+  return `${backHeute}<h1>🌈 Ideen-Schatzkiste</h1><div class="mute">Lieder, Fingerspiele, Morgenkreis, Basteln, Zahngesundheit, Montessori und Erste Hilfe für Kinder von 1 bis 6 Jahren.</div>
+  ${day ? `<div class="card"><h3>🌞 Morgenkreis für heute</h3><span class="tag">${esc(day.title)}</span><p><b>🎵 Lied / Fingerspiel:</b> ${esc(day.song)}</p><p><b>🎲 Aktivität:</b> ${esc(day.activity)}</p><p class="mini">Etwa 5–10 Minuten. Passe alles an Stimmung und Tagesform der Kinder an.</p><div class="btns" style="margin-top:0"><button class="btn sm" data-act="icircle">Als Wochenidee übernehmen</button></div></div>` : ''}
+  <div class="card"><label style="margin-top:0" for="idea_q">Suche</label><input id="idea_q" value="${esc(ui.iq || '')}" placeholder="z. B. Herbst, Zähne, Lied"><div class="two"><div><label for="idea_cat">Thema</label><select id="idea_cat">${cats.map(c => `<option ${c === cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div><div><label for="idea_age">Alter</label><select id="idea_age">${['Alle', '1–2', '2–3', '3–6'].map(c => `<option ${c === age ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div></div>
+  ${list.map(([a, i]) => `<div class="card"><span class="tag" style="margin-top:0">${esc(a.cat)}</span><span class="tag" style="margin-top:0">👶 ${esc(a.age)} Jahre</span><span class="tag" style="margin-top:0">${esc(a.season)}</span><span class="tag" style="margin-top:0">⏱ ${esc(a.time)}</span><h3 style="margin-top:8px;color:var(--pri)">${esc(a.title)}</h3><p><b>Material:</b> ${esc(a.materials)}</p><p><b>So geht’s:</b> ${esc(a.how)}</p><p><b>Anpassung &amp; Sicherheit:</b> ${esc(a.adapt)}</p><div class="btns" style="margin-top:0"><button class="btn sm" data-act="iadd" data-i="${i}">＋ In Wochenplan übernehmen</button></div></div>`).join('') || '<div class="card mute">Keine passenden Ideen gefunden. Ändere den Suchbegriff oder wähle „Alle“.</div>'}
+  <div class="info">Sicherheit: Erste-Hilfe-Spiele sind nur zum Kennenlernen gedacht. Keine engen Verbände an Hals oder Brust, keine Pflaster auf Mund oder Nase, keine Medikamente oder echten Verletzungen nachspielen. Bei echten Notfällen gilt der aktuelle Erste-Hilfe-Kurs und der Notruf 112.</div>`;
+}
+
+function viewNotizen() {
+  return `${backHeute}<h1>Tagesnotizen</h1>${dayBar()}<div class="card"><label style="margin-top:0" for="notes_in">Notizen für diesen Tag</label><textarea id="notes_in" style="min-height:260px" placeholder="Besonderheiten, Übergaben, Erinnerungen …">${esc(db.notes[curDay()] || '')}</textarea><p class="mini">Wird automatisch gespeichert.</p></div>`;
+}
+const areaOf = c => ({'Jahreszeiten & Basteln': 'Kreativangebot', 'Lied & Fingerspiel': 'Sprache', 'Morgenkreis': 'Sprache', 'Bewegung & Sinne': 'Bewegung', 'Erste Hilfe spielerisch': 'Erste Hilfe', 'Montessori': 'Praktisches Leben'}[c] || (WAREAS.includes(c) ? c : 'Praktisches Leben'));
+const weekDayOf = d => { const n = parseD(d).getDay(); return WDAYS[n >= 1 && n <= 5 ? n - 1 : 0]; };
+let noteTimer;
+
 /* ---------- Dokumente ---------- */
 const DCATS = ['Vertrag', 'Pflegeerlaubnis', 'Erste-Hilfe-Nachweis', 'Fortbildung / Zertifikat', 'Versicherung', 'Sonstiges'];
 const daysLeft = d => Math.round((parseD(d) - parseD(today())) / 864e5);
@@ -585,7 +698,7 @@ function yearSheet() {
   const inCats = [...new Set(rows.filter(r => r[1] === 'Einnahme').map(r => r[2]))], outCats = [...new Set(rows.filter(r => r[1] === 'Ausgabe').map(r => r[2]))];
   openSheet(`${sheetTop('Jahresübersicht')}
   <div class="row"><button class="btn sm" data-act="yprev" style="flex:none">‹</button><div class="grow" style="text-align:center;font-size:22px;font-weight:700">${y}</div><button class="btn sm" data-act="ynext" style="flex:none">›</button></div>
-  <h2>Casabambini – Einnahmen &amp; Ausgaben ${y}</h2>
+  <h2>Casa Bambini – Einnahmen &amp; Ausgaben ${y}</h2>
   <table class="t"><tr><th colspan="2">Einnahmen</th></tr>${inCats.map(c => `<tr><td>${esc(c)}</td><td>${eur(sum('Einnahme', c))}</td></tr>`).join('')}<tr class="sum"><td>Summe Einnahmen</td><td>${eur(sum('Einnahme'))}</td></tr></table>
   <table class="t"><tr><th colspan="2">Ausgaben</th></tr>${outCats.map(c => `<tr><td>${esc(c)}</td><td>${eur(sum('Ausgabe', c))}</td></tr>`).join('')}<tr class="sum"><td>Summe Ausgaben</td><td>${eur(sum('Ausgabe'))}</td></tr></table>
   <table class="t"><tr class="sum"><td>Überschuss</td><td>${eur(sum('Einnahme') - sum('Ausgabe'))}</td></tr></table>
@@ -696,7 +809,7 @@ function obsSheet(cid, keep) {
 /* ---------- Aktionen ---------- */
 const A = {
   unlock: doUnlock, lock,
-  tab: (el) => { ui.tab = el.dataset.v; closeSheet(); render(); window.scrollTo(0, 0); },
+  tab: (el) => { ui.tab = el.dataset.v; if (['routine', 'hygiene', 'notizen'].includes(ui.tab)) ui.day = today(); closeSheet(); render(); window.scrollTo(0, 0); },
   close: () => { saveNote(); closeSheet(); E = null; DOC = null; OB = null; EV = null; render(); },
   flnew: () => { FF = {id: null, title: '', cat: DCATS[0], owner: '', expires: '', note: '', file: null}; flForm(); },
   fledit: (el) => { FF = JSON.parse(JSON.stringify(db.files.find(x => x.id === el.dataset.id))); flForm(); },
@@ -742,6 +855,28 @@ const A = {
   ltog: (el) => { const x = db[el.dataset.k].find(i => i.id === el.dataset.id); x.done = !x.done; save(); render(); },
   ldel: (el) => { db[el.dataset.k] = db[el.dataset.k].filter(i => i.id !== el.dataset.id); save(); render(); },
   lclear: (el) => { db[el.dataset.k] = db[el.dataset.k].filter(i => !i.done); save(); render(); },
+  dday: (el) => { const d = parseD(curDay()); d.setDate(d.getDate() + +el.dataset.v); ui.day = dstr(d); render(); },
+  rpdone: (el) => { const x = ensurePlan(curDay()).find(i => i.id === el.dataset.id); x.done = !x.done; save(); render(); },
+  rpdel: (el) => { db.dayplan[curDay()] = ensurePlan(curDay()).filter(i => i.id !== el.dataset.id); save(); render(); },
+  rpadd: () => {
+    const title = $('#rp_title').value.trim(); if (!title) return alert('Bitte gib einen Programmpunkt ein.');
+    ensurePlan(curDay()).push({id: 'c' + uid(), time: $('#rp_time').value || '', type: $('#rp_type').value, title, note: $('#rp_note').value.trim(), done: false}); save(); render();
+  },
+  rphase: (el) => { db.phase = el.dataset.v; save(); render(); },
+  rtchk: (el) => { const k = curDay() + '|' + el.dataset.t; if (db.chk[k]) delete db.chk[k]; else db.chk[k] = true; save(); render(); },
+  rtadd: () => { const text = $('#rt_text').value.trim(); if (!text) return alert('Bitte gib eine Aufgabe ein.'); db.customTasks.push({text, time: $('#rt_time').value || 'Flexibel', phase: db.phase || PHASES[0]}); save(); render(); },
+  rtdel: (el) => { db.customTasks = db.customTasks.filter(t => t.text !== el.dataset.t); save(); render(); },
+  rtreset: () => { Object.keys(db.chk).filter(k => k.startsWith(curDay() + '|')).forEach(k => delete db.chk[k]); save(); render(); },
+  hchk: (el) => { const k = 'h' + curDay() + '|' + el.dataset.t; if (db.chk[k]) delete db.chk[k]; else db.chk[k] = true; save(); render(); },
+  hadd: () => { const t = $('#h_new').value.trim(); if (!t) return; db.customHyg.push(t); save(); render(); },
+  hdel: (el) => { db.customHyg = db.customHyg.filter(t => t !== el.dataset.t); save(); render(); },
+  wadd: () => {
+    const title = $('#w_title').value.trim(); if (!title) return alert('Bitte gib ein Angebot ein.');
+    db.week.push({id: uid(), day: $('#w_day').value, area: $('#w_area').value, title, note: $('#w_note').value.trim()}); ui.wd = null; save(); render();
+  },
+  wdel: (el) => { db.week = db.week.filter(x => x.id !== el.dataset.id); save(); render(); },
+  iadd: (el) => { const a = activityLibrary[+el.dataset.i]; ui.wd = {day: weekDayOf(curDay()), area: areaOf(a.cat), title: a.title, note: 'Material: ' + a.materials + '\nAblauf: ' + a.how + '\nAnpassung/Sicherheit: ' + a.adapt}; ui.tab = 'woche'; render(); window.scrollTo(0, 0); },
+  icircle: () => { const c = weekdayCircle[String(parseD(curDay()).getDay())] || weekdayCircle['1']; ui.wd = {day: weekDayOf(curDay()), area: 'Sprache', title: c.title, note: c.song + '; ' + c.activity}; ui.tab = 'woche'; render(); window.scrollTo(0, 0); },
   fprev: () => shiftFm(-1), fnext: () => shiftFm(1),
   paytoggle: (el) => {
     const c = kid(el.dataset.id), k = el.dataset.k, p = payRec(c.id, ui.fm, k);
@@ -879,6 +1014,15 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
   if (!db) doUnlock(); else if (/^(shop|todo)_in$/.test(e.target.id)) A.ladd({dataset: {k: e.target.id.slice(0, 4)}});
+});
+document.addEventListener('input', e => {
+  const id = e.target.id;
+  if (id === 'notes_in' && db) { db.notes[curDay()] = e.target.value; clearTimeout(noteTimer); noteTimer = setTimeout(save, 600); }
+  else if (id === 'idea_q' && db) { ui.iq = e.target.value; render(); const el = $('#idea_q'); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+});
+document.addEventListener('change', e => {
+  if (!db) return;
+  if (e.target.id === 'idea_cat') { ui.icat = e.target.value; render(); } else if (e.target.id === 'idea_age') { ui.iage = e.target.value; render(); }
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden && db) { clearTimeout(lockTimer); lockTimer = setTimeout(lock, 5*60*1000); } else touch(); });
 
